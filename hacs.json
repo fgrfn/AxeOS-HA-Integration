@@ -10,7 +10,7 @@
   "documentation": "https://github.com/fgrfn/AxeOS-HA-Integration/",
   "homeassistant": "2022.3.0",
   "render_readme": true,
-  "logo": "https://raw.githubusercontent.com/fgrfn/AxeOS-HA-Integration/main/logo.png",
+  "logo": "https://raw.githubusercontent.com/fgrfn/AxeOS-HA-Integration/main/logo.png"
   "type": "integration",
   "codeowners": ["@fgrfn"]
 }
