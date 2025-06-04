@@ -5,7 +5,7 @@
 ## Installation über HACS
 
 1. Öffne Home Assistant und navigiere zu **HACS → Einstellungen → Custom Repositories**.
-2. Füge die Repository-URL hinzu (zum Beispiel: `https://github.com/fgrfn/ha-axeos-integration`) und wähle als Kategorie **Integration**.
+2. Füge die Repository-URL hinzu (zum Beispiel: `https://github.com/deinusername/ha-axeos-integration`) und wähle als Kategorie **Integration**.
 3. Gehe zu **HACS → Integrationen**, suche nach **AxeOS-HA-Integration** und installiere sie.
 4. Starte Home Assistant neu.
 5. Navigiere zu **Einstellungen → Integrationen → + Hinzufügen → AxeOS-HA-Integration**, um deinen AxeOS Miner hinzuzufügen.
