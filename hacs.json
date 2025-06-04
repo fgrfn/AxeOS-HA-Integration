@@ -1,7 +1,7 @@
 {
-  "name": "AxeOS HA Integration",
+  "name": "AxeOS-HA-Integration"",
   "content_in_root": false,
-  "filename": "custom_components/axeos_ha"
+  "filename": "custom_components/AxeOS-HA-Integration"
   "country": "DE",
   "homeassistant": "2022.3.0",
 }  
