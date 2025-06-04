@@ -2,12 +2,10 @@
   "domain": "axeos_ha",
   "name": "AxeOS-HA-Integration",
   "version": "1.0.0",
-  "documentation": "https://github.com/deinusername/ha-axeos-integration",
+  "documentation": "https://github.com/fgrfn/ha-axeos-integration",
   "requirements": [],
   "dependencies": [],
-  "codeowners": [
-    "@deinusername"
-  ],
+  "codeowners": ["@fgrfn"],
   "config_flow": true,
   "iot_class": "local_polling"
 }
