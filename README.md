@@ -186,25 +186,6 @@ cards:
       - sensor.gamma_uptimeSeconds
       - button.gamma_restart
 ```
-
----
-
-## Contributing
-
-1. **Fork** the repository and create a new branch for your feature or bugfix.
-2. **Commit** your changes and push to your fork.
-3. Create a **Pull Request** describing your changes in detail.
-4. Ensure **code style** follows [Home Assistant’s guidelines](https://developers.home-assistant.io/docs/development_guidelines).
-5. Add or update **unit tests** if applicable.
-
-All contributions are welcome—feel free to report issues, suggest new features, or submit code improvements!
-
----
-
-## Versioning
-
-We use [Semantic Versioning](https://semver.org/). Every release is tagged on GitHub (e.g., `v1.0.0`). Please update the `version` field in `manifest.json` before creating a new release.
-
 ---
 
 ## License
