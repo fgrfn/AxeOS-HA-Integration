@@ -1,0 +1,7 @@
+{
+  "name": "AxeOS-HA-Integration",
+  "content_in_root": false,
+  "homeassistant": "2022.3.0",
+  "render_readme": true,
+  "type": "integration"
+}
