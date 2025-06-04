@@ -1,5 +1,5 @@
 {
-  "domain": "axeos_ha",
+  "domain": "AxeOS HA Integration",
   "name": "AxeOS-HA-Integration",
   "version": "1.0.0",
   "documentation": "https://github.com/fgrfn/ha-axeos-integration",
