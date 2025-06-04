@@ -1,4 +1,4 @@
-"""Sensor-Platform für AxeOS Miner (erweiterte Version mit allen system/info-Feldern)."""
+"""Sensor-Platform für AxeOS-HA-Integration: nur System-Info-Felder."""
 
 from __future__ import annotations
 import logging
@@ -14,37 +14,40 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-# ---------------------------------------------------------------------------------------
-#   SENSOR_TYPES: Mapping aller relevanten Felder aus /api/system/info auf Home Assistant
-# ---------------------------------------------------------------------------------------
+# -------------------------------------------------------------------------
+# SENSOR_TYPES: Mapping der relevanten Felder aus /api/system/info auf Home Assistant
+# key: interne Kennung (unique_id suffix)
+# value: Tuple (Name-Suffix, Einheit, data_path)
+# data_path: verschachtelter Pfad in coordinator.data (z.B. "power", "voltage", "hashRate" usw.)
+# -------------------------------------------------------------------------
 SENSOR_TYPES: dict[str, tuple[str, str | None, str]] = {
-    "power":             ("Leistungsaufnahme", "W", "system.power"),
-    "voltage":           ("Spannung", "mV", "system.voltage"),
-    "current":           ("Strom", "mA", "system.current"),
-    "temp":              ("Chip-Temperatur", "°C", "system.temp"),
-    "vrTemp":            ("VR-Temperatur", "°C", "system.vrTemp"),
-    "maxPower":          ("Maximale Leistung", "W", "system.maxPower"),
-    "nominalVoltage":    ("Nominalspannung", "V", "system.nominalVoltage"),
-    "hashRate":          ("Aktuelle Hashrate", "H/s", "system.hashRate"),
-    "expectedHashrate":  ("Erwartete Hashrate", "H/s", "system.expectedHashrate"),
-    "sharesAccepted":    ("Akzeptierte Shares", None, "system.sharesAccepted"),
-    "sharesRejected":    ("Abgelehnte Shares", None, "system.sharesRejected"),
-    "uptimeSeconds":     ("Betriebsdauer", "s", "system.uptimeSeconds"),
-    "wifiRSSI":          ("WLAN-Signalstärke", "dBm", "system.wifiRSSI"),
-    "freeHeap":          ("Freier Heap", "Bytes", "system.freeHeap"),
-    "fanspeed":          ("Lüfterdrehzahl %-Anteil", "%", "system.fanspeed"),
-    "fanrpm":            ("Lüfter-RPM", "RPM", "system.fanrpm"),
-    "frequency":         ("Taktfrequenz", "MHz", "system.frequency"),
-    "coreVoltage":       ("Kernspannung Soll", "mV", "system.coreVoltage"),
-    "coreVoltageActual": ("Kernspannung Ist", "mV", "system.coreVoltageActual"),
-    "asicCount":         ("Anzahl ASICs", None, "system.asicCount"),
-    "smallCoreCount":    ("Anzahl Cores gesamt", None, "system.smallCoreCount"),
-    "ASICModel":         ("ASIC-Modell", None, "system.ASICModel"),
-    "version":           ("Firmware-Version", None, "system.version"),
-    "ssid":              ("WLAN SSID", None, "system.ssid"),
-    "macAddr":           ("MAC-Adresse", None, "system.macAddr"),
-    "hostname":          ("Hostname", None, "system.hostname"),
-    "wifiStatus":        ("WLAN-Status", None, "system.wifiStatus"),
+    "power":             ("Leistungsaufnahme", "W", "power"),
+    "voltage":           ("Spannung", "mV", "voltage"),
+    "current":           ("Strom", "mA", "current"),
+    "temp":              ("Chip-Temperatur", "°C", "temp"),
+    "vrTemp":            ("VR-Temperatur", "°C", "vrTemp"),
+    "maxPower":          ("Maximale Leistung", "W", "maxPower"),
+    "nominalVoltage":    ("Nominalspannung", "V", "nominalVoltage"),
+    "hashRate":          ("Aktuelle Hashrate", "H/s", "hashRate"),
+    "expectedHashrate":  ("Erwartete Hashrate", "H/s", "expectedHashrate"),
+    "sharesAccepted":    ("Akzeptierte Shares", None, "sharesAccepted"),
+    "sharesRejected":    ("Abgelehnte Shares", None, "sharesRejected"),
+    "uptimeSeconds":     ("Betriebsdauer", "s", "uptimeSeconds"),
+    "wifiRSSI":          ("WLAN-Signalstärke", "dBm", "wifiRSSI"),
+    "freeHeap":          ("Freier Heap", "Bytes", "freeHeap"),
+    "fanspeed":          ("Lüfterdrehzahl %-Anteil", "%", "fanspeed"),
+    "fanrpm":            ("Lüfter-RPM", "RPM", "fanrpm"),
+    "frequency":         ("Taktfrequenz", "MHz", "frequency"),
+    "coreVoltage":       ("Kernspannung Soll", "mV", "coreVoltage"),
+    "coreVoltageActual": ("Kernspannung Ist", "mV", "coreVoltageActual"),
+    "asicCount":         ("Anzahl ASICs", None, "asicCount"),
+    "smallCoreCount":    ("Anzahl Cores gesamt", None, "smallCoreCount"),
+    "ASICModel":         ("ASIC-Modell", None, "ASICModel"),
+    "version":           ("Firmware-Version", None, "version"),
+    "ssid":              ("WLAN SSID", None, "ssid"),
+    "macAddr":           ("MAC-Adresse", None, "macAddr"),
+    "hostname":          ("Hostname", None, "hostname"),
+    "wifiStatus":        ("WLAN-Status", None, "wifiStatus"),
 }
 
 async def async_setup_entry(
@@ -59,7 +62,7 @@ async def async_setup_entry(
     entities: list[SensorEntity] = []
     for key, (suffix, unit, data_path) in SENSOR_TYPES.items():
         entities.append(
-            AxeOSSensor(
+            AxeOSHASensor(
                 coordinator=coordinator,
                 entry_id=entry.entry_id,
                 miner_name=miner_name,
@@ -73,8 +76,8 @@ async def async_setup_entry(
     async_add_entities(entities, update_before_add=True)
 
 
-class AxeOSSensor(CoordinatorEntity, SensorEntity):
-    """Allgemeine Sensor-Entity für einen BitAxe-Miner-Wert."""
+class AxeOSHASensor(CoordinatorEntity, SensorEntity):
+    """Allgemeine Sensor-Entity für einen AxeOS-HA-Wert (nur aus System-Info)."""
 
     def __init__(
         self,
@@ -91,42 +94,40 @@ class AxeOSSensor(CoordinatorEntity, SensorEntity):
         self.entry_id = entry_id
         self.miner_name = miner_name
         self.sensor_key = sensor_key
-        # z. B. "Miner1 Chip-Temperatur"
+
+        # Name: z.B. "BitAxe-Gamma Leistungsaufnahme"
         self._attr_name = f"{miner_name} {suffix}"
         self._attr_native_unit_of_measurement = unit
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
-        # data_path als Liste aufsplitten, z.B. "system.temp" → ["system","temp"]
-        self.data_path = data_path.split(".")
+        # data_path ist jetzt ein einfacher Key (z.B. "power" oder "voltage")
+        self.data_key = data_path
 
-        # Unique ID: <host>_<sensor_key>
-        try:
-            host = coordinator.data["system"].get("hostname", entry_id)
-        except Exception:
-            host = entry_id
+        # Unique ID: <host>_<sensor_key>, host kann aus coordinator.data["hostname"] kommen
+        host = (coordinator.data.get("hostname") or entry_id).replace(" ", "_")
         self._attr_unique_id = f"{host}_{sensor_key}"
 
         self._state = None
 
     @property
     def native_value(self):
-        """Gibt den aktuellen wert zurück."""
+        """Gibt den aktuellen Wert zurück."""
         return self._state
 
     @property
     def device_class(self):
-        """Setzt bei Temperatur- oder Dauer-Sensoren die device_class."""
+        """Setzt device_class, falls relevant."""
         if self.sensor_key in ("temp", "vrTemp"):
             return "temperature"
         if self.sensor_key == "uptimeSeconds":
             return "duration"
-        if self.sensor_key in ("wifiRSSI",):
+        if self.sensor_key == "wifiRSSI":
             return "signal_strength"
         return None
 
     @property
     def icon(self):
-        """Gibt ein passendes Icon zurück je nach Sensor-Typ."""
+        """Icon pro Sensor-Typ."""
         icons = {
             "power": "mdi:flash",
             "voltage": "mdi:flash-auto",
@@ -157,24 +158,16 @@ class AxeOSSensor(CoordinatorEntity, SensorEntity):
         return icons.get(self.sensor_key)
 
     def _get_value_from_data(self) -> any:
-        """Liest den verschachtelten Wert aus coordinator.data anhand von data_path aus."""
+        """Liest den Wert aus coordinator.data anhand data_key aus."""
         data = self.coordinator.data
-        try:
-            for key in self.data_path:
-                if data is None:
-                    return None
-                data = data.get(key)
-            return data
-        except Exception:
-            return None
+        return data.get(self.data_key)
 
     def _handle_coordinator_update(self) -> None:
         """Wird bei jedem Coordinator-Update ausgeführt."""
-        raw = self._get_value_from_data()
-        self._state = raw
+        self._state = self._get_value_from_data()
         self.async_write_ha_state()
 
     async def async_added_to_hass(self) -> None:
-        """Beim Einfügen der Entity wird direkt ein erster Status-Wert gesetzt."""
+        """Beim Einfügen der Entity: Setze ersten Wert."""
         await super().async_added_to_hass()
         self._handle_coordinator_update()
