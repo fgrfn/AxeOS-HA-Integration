@@ -1,6 +1,6 @@
 """Konstanten für die AxeOS-HA-Integration."""
 
-DOMAIN = "AxeOS-HA-Integration"
+DOMAIN = "axeos_ha_integration"
 DEFAULT_SCAN_INTERVAL = 30  # in Sekunden
 
 CONF_HOST = "host"
