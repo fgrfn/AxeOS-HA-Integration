@@ -60,7 +60,7 @@ This integration works over your local network (HTTP) and is designed for simpli
    - Go to **HACS → Settings → Custom Repositories**.  
    - Enter the repository URL:  
      ```
-     https://github.com/fgrfn/ha-axeos-integration
+     https://github.com/fgrfn/AxeOS-HA-Integration
      ```  
    - Select **Integration** as the category and click **Add**.
 
