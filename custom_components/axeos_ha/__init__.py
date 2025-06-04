@@ -1,6 +1,7 @@
 """BitAxe Integration für Home Assistant."""
 
 import logging
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from datetime import timedelta
 
 from homeassistant.config_entries import ConfigEntry
@@ -25,7 +26,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     name = entry.data.get(CONF_NAME, host)
 
     # Gemeinsame aiohttp-Session von HA nutzen
-    session = hass.helpers.aiohttp_client.async_get_clientsession()
+    session = async_get_clientsession(hass)
     api = AxeOSAPI(session, host)
 
     # Update-Funktion, die System- und Swarm-Info abfragt
