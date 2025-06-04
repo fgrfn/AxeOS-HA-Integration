@@ -2,16 +2,15 @@
   "name": "AxeOS-HA-Integration",
   "content_in_root": false,
   "country": "DE",
-  "description": "x",
+  "description": "Integration für AxeOS-Sensoren und -Gateways in Home Assistant",
   "domains": ["axeos_ha"],
   "iot_class": "local_polling",
   "filename": "custom_components/axeos_ha",
-  "version": "1.0.4",
+  "version": "1.0.0",
   "documentation": "https://github.com/fgrfn/AxeOS-HA-Integration/",
   "homeassistant": "2022.3.0",
   "render_readme": true,
   "logo": "https://raw.githubusercontent.com/fgrfn/AxeOS-HA-Integration/main/logo.png",
   "type": "integration",
   "codeowners": ["@fgrfn"]
-
 }
