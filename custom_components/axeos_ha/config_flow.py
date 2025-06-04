@@ -55,7 +55,7 @@ class AxeOSConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
                     errors["base"] = "cannot_connect"
                 else:
                     # Doppelte Einträge vermeiden
-                    await self._async_abort_entries_match({CONF_HOST: host})
+                    self._async_abort_entries_match({CONF_HOST: host})
                     return self.async_create_entry(
                         title=name,
                         data={CONF_HOST: host, CONF_NAME: name},
