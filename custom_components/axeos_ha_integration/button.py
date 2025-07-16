@@ -29,6 +29,7 @@ async def async_setup_entry(
 
 class AxeOSRestartButton(ButtonEntity):
     """Button to restart the AxeOS miner."""
+    _attr_entity_registry_enabled_default = True
 
     def __init__(self, entry_id: str, miner_name: str, host: str, api: AxeOSAPI) -> None:
         """Initialize the restart button."""
