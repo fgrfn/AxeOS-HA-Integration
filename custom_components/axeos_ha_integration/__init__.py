@@ -29,16 +29,17 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     session = async_get_clientsession(hass)
     api = AxeOSAPI(session, host)
 
+    hass.data.setdefault(DOMAIN, {})
+    hass.data[DOMAIN][entry.entry_id] = {}
+
     async def async_update_data():
-        """Fetch only the system info from the miner."""
+        # Now entry_data exists!
         system_info = await api.get_system_info()
         if system_info is None:
             raise UpdateFailed(f"Cannot fetch system info from {host}")
 
-        # Store hashRate history for statistics
         hr = system_info.get("hashRate")
         if hr is not None:
-            # Store history in hass.data, not only in system_info
             entry_data = hass.data[DOMAIN][entry.entry_id]
             history = entry_data.get("hashrate_history", [])
             history.append(hr)
