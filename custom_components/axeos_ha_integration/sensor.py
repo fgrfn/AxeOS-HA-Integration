@@ -237,6 +237,16 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
 
         return attrs if attrs else None
 
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {(DOMAIN, self.entry_id)},
+            "name": self.miner_name,
+            "manufacturer": "BitAxe",
+            "model": self.coordinator.data.get("boardVersion", "BitAxe Miner"),
+            "sw_version": self.coordinator.data.get("version", ""),
+        }
+
 
 class AxeOSConnectionStatusSensor(CoordinatorEntity, SensorEntity):
     """Sensor to show if the miner is online."""

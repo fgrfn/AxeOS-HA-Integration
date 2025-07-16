@@ -23,15 +23,16 @@ async def async_setup_entry(
     host = hass.data[DOMAIN][entry.entry_id]["host"]
 
     async_add_entities(
-        [AxeOSRestartButton(miner_name, host, api)],
+        [AxeOSRestartButton(entry.entry_id, miner_name, host, api)],
         update_before_add=False,
     )
 
 class AxeOSRestartButton(ButtonEntity):
     """Button to restart the AxeOS miner."""
 
-    def __init__(self, miner_name: str, host: str, api: AxeOSAPI) -> None:
+    def __init__(self, entry_id: str, miner_name: str, host: str, api: AxeOSAPI) -> None:
         """Initialize the restart button."""
+        self.entry_id = entry_id
         self.miner_name = miner_name
         self.host = host
         self.api = api
@@ -47,6 +48,16 @@ class AxeOSRestartButton(ButtonEntity):
             _LOGGER.info("Restart successfully sent to %s", self.host)
         else:
             _LOGGER.error("Restart failed for %s", self.host)
+
+    @property
+    def device_info(self):
+        return {
+            "identifiers": {(DOMAIN, self.entry_id)},
+            "name": self.miner_name,
+            "manufacturer": "BitAxe",
+            "model": self.api.coordinator.data.get("boardVersion", "BitAxe Miner"),
+            "sw_version": self.api.coordinator.data.get("version", ""),
+        }
 
 # Example for AxeOSAPI
 import aiohttp
