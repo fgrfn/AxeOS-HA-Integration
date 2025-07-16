@@ -88,19 +88,55 @@ def get_value(data, keys):
             return data[key]
     return None
 
+def validate_sensor_types():
+    """Validate the structure of SENSOR_TYPES dictionary."""
+    for key, value in SENSOR_TYPES.items():
+        if not isinstance(value, tuple) or len(value) != 3:
+            _LOGGER.error("Invalid SENSOR_TYPES entry for %s: expected tuple of length 3, got %s", key, value)
+            continue
+        
+        name_suffix, unit, data_path = value
+        if not isinstance(name_suffix, str):
+            _LOGGER.error("Invalid name_suffix for %s: expected str, got %s", key, type(name_suffix))
+        if unit is not None and not isinstance(unit, str):
+            _LOGGER.error("Invalid unit for %s: expected str or None, got %s", key, type(unit))
+        if not isinstance(data_path, list) or not data_path:
+            _LOGGER.error("Invalid data_path for %s: expected non-empty list, got %s", key, data_path)
+
+# Validate sensor types at module load
+validate_sensor_types()
+
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
+    miner_name = hass.data[DOMAIN][entry.entry_id]["name"]
     data = coordinator.data
 
     entities = []
-    for key, (name, unit, keys) in SENSOR_TYPES.items():
-        value = get_value(data, keys)
+    for key, (name_suffix, unit, data_path) in SENSOR_TYPES.items():
+        # Validate SENSOR_TYPES entry structure
+        if not isinstance(name_suffix, str) or not isinstance(data_path, list):
+            _LOGGER.error("Invalid SENSOR_TYPES entry for %s: name_suffix=%s, data_path=%s", 
+                         key, name_suffix, data_path)
+            continue
+            
+        value = get_value(data, data_path)
         if value is not None:
-            entities.append(AxeOSHASensor(coordinator, entry.entry_id, name, key, unit))
+            try:
+                entities.append(AxeOSHASensor(coordinator, entry.entry_id, miner_name, key, name_suffix, unit, data_path))
+                _LOGGER.debug("Created sensor entity for %s: %s", key, name_suffix)
+            except Exception as err:
+                _LOGGER.error("Failed to create sensor entity for %s: %s", key, err)
+        else:
+            _LOGGER.debug("Skipping sensor %s: no data available in coordinator.data", key)
+
+    if not entities:
+        _LOGGER.warning("No sensor entities were created. Check if coordinator data is available and valid.")
+    else:
+        _LOGGER.info("Created %d sensor entities", len(entities))
 
     async_add_entities(entities)
 
@@ -189,14 +225,31 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         return icons.get(self.sensor_key)
 
     def _get_value_from_data(self) -> any:
-        """Reads the value from coordinator.data using data_key."""
-        data = self.coordinator.data
-        return get_value(data, self.data_keys)
+        """Reads the value from coordinator.data using data_keys."""
+        try:
+            data = self.coordinator.data
+            if not data:
+                _LOGGER.debug("No coordinator data available for sensor %s", self.sensor_key)
+                return None
+            
+            value = get_value(data, self.data_keys)
+            if value is None:
+                _LOGGER.debug("No value found for sensor %s with data_keys %s", self.sensor_key, self.data_keys)
+            return value
+        except Exception as err:
+            _LOGGER.error("Error getting value for sensor %s: %s", self.sensor_key, err)
+            return None
 
     def _handle_coordinator_update(self) -> None:
         """Executed on every coordinator update."""
-        self._state = self._get_value_from_data()
-        self.async_write_ha_state()
+        try:
+            new_state = self._get_value_from_data()
+            if new_state != self._state:
+                _LOGGER.debug("State changed for sensor %s: %s -> %s", self.sensor_key, self._state, new_state)
+            self._state = new_state
+            self.async_write_ha_state()
+        except Exception as err:
+            _LOGGER.error("Error updating sensor %s: %s", self.sensor_key, err)
 
     async def async_added_to_hass(self) -> None:
         """When the entity is added: set initial value."""
@@ -210,7 +263,7 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
 
         # Show rejected reasons as attribute for the relevant sensor
         if self.sensor_key == "sharesRejectedReasons":
-            value = self.coordinator.data.get(self.data_key)
+            value = get_value(self.coordinator.data, self.data_keys)
             if isinstance(value, list):
                 attrs["rejected_reasons"] = value
 
