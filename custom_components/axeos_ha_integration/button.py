@@ -55,8 +55,8 @@ class AxeOSRestartButton(ButtonEntity):
             "identifiers": {(DOMAIN, self.entry_id)},
             "name": self.miner_name,
             "manufacturer": "BitAxe",
-            "model": self.api.coordinator.data.get("boardVersion", "BitAxe Miner"),
-            "sw_version": self.api.coordinator.data.get("version", ""),
+            "model": self.coordinator.data.get("boardVersion", "BitAxe Miner"),
+            "sw_version": self.coordinator.data.get("version", ""),
         }
 
 # Example for AxeOSAPI
