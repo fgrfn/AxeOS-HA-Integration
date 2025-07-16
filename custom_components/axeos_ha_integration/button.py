@@ -1,4 +1,4 @@
-"""Button-Platform für AxeOS Miner (Neustart)."""
+"""Button platform for AxeOS Miner (Restart)."""
 
 import logging
 
@@ -17,7 +17,7 @@ async def async_setup_entry(
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Registriere die Restart-Button-Entity für jeden Miner."""
+    """Register the restart button entity for each miner."""
     api = hass.data[DOMAIN][entry.entry_id]["api"]
     miner_name = hass.data[DOMAIN][entry.entry_id]["name"]
     host = hass.data[DOMAIN][entry.entry_id]["host"]
@@ -28,22 +28,35 @@ async def async_setup_entry(
     )
 
 class AxeOSRestartButton(ButtonEntity):
-    """Button, um den AxeOS Miner neuzustarten."""
+    """Button to restart the AxeOS miner."""
 
     def __init__(self, miner_name: str, host: str, api: AxeOSAPI) -> None:
-        """Initialisiere den Restart-Button."""
+        """Initialize the restart button."""
         self.miner_name = miner_name
         self.host = host
         self.api = api
-        self._attr_name = f"{miner_name} Neustart"
+        self._attr_name = f"{miner_name} Restart"
         self._attr_icon = "mdi:restart"
         self._attr_unique_id = f"{host}_restart_button"
 
     async def async_press(self) -> None:
-        """Wird aufgerufen, wenn der Button gedrückt wird."""
-        _LOGGER.debug("Neustart für BitAxe %s (%s) angefordert", self.miner_name, self.host)
+        """Called when the button is pressed."""
+        _LOGGER.debug("Restart requested for BitAxe %s (%s)", self.miner_name, self.host)
         success = await self.api.restart_system()
         if success:
-            _LOGGER.info("Neustart erfolgreich gesendet an %s", self.host)
+            _LOGGER.info("Restart successfully sent to %s", self.host)
         else:
-            _LOGGER.error("Neustart fehlgeschlagen für %s", self.host)
+            _LOGGER.error("Restart failed for %s", self.host)
+
+# Example for AxeOSAPI
+import aiohttp
+
+class AxeOSAPI:
+    def __init__(self, host: str):
+        self.host = host
+
+    async def restart_system(self) -> bool:
+        url = f"http://{self.host}/api/system/restart"
+        async with aiohttp.ClientSession() as session:
+            async with session.post(url) as resp:
+                return resp.status == 200

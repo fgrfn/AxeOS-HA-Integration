@@ -10,44 +10,63 @@ import logging
 from .const import DOMAIN, DEFAULT_SCAN_INTERVAL, CONF_HOST, CONF_NAME
 from .api import AxeOSAPI
 
-_LOGGER = logging.getLogger(__name__)
+def get_logger(level):
+    logger = logging.getLogger(__name__)
+    logger.setLevel(getattr(logging, level.upper(), logging.INFO))
+    return logger
 
-PLATFORMS = ["sensor", "button"]  # falls du Button behalten möchtest
+PLATFORMS = ["sensor", "button"]  # keep button if desired
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Wird aufgerufen, wenn ein Config Entry angelegt oder geladen wird."""
+    """Called when a config entry is created or loaded."""
+    logging_level = entry.options.get("logging_level", "info")
+    _LOGGER = get_logger(logging_level)
+
     host = entry.data[CONF_HOST]
     name = entry.data.get(CONF_NAME, host)
 
-    # Gemeinsame aiohttp-Session von HA nutzen
+    # Use shared aiohttp session from Home Assistant
     session = async_get_clientsession(hass)
     api = AxeOSAPI(session, host)
 
     async def async_update_data():
-        """Fetch nur die System-Info vom Miner."""
+        """Fetch only the system info from the miner."""
         system_info = await api.get_system_info()
         if system_info is None:
-            raise UpdateFailed(f"Kann System Info von {host} nicht abrufen")
-        return system_info  # kein Swarm mehr
+            raise UpdateFailed(f"Cannot fetch system info from {host}")
+
+        # Store hashRate history for statistics
+        hr = system_info.get("hashRate")
+        if hr is not None:
+            # Store history in hass.data, not only in system_info
+            entry_data = hass.data[DOMAIN][entry.entry_id]
+            history = entry_data.get("hashrate_history", [])
+            history.append(hr)
+            if len(history) > 100:
+                history = history[-100:]
+            entry_data["hashrate_history"] = history
+            system_info["hashrate_history"] = history
+
+        return system_info
 
     coordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,
         name=f"{DOMAIN}_{host}",
         update_method=async_update_data,
-        update_interval=timedelta(seconds=DEFAULT_SCAN_INTERVAL),
+        update_interval=timedelta(seconds=entry.options.get("scan_interval", DEFAULT_SCAN_INTERVAL)),
     )
 
-    # Erstes Update, um Connectivity zu prüfen
+    # Initial update to check connectivity
     try:
         await coordinator.async_refresh()
     except Exception as err:
-        raise ConfigEntryNotReady(f"Erst-Update fehlgeschlagen: {err}") from err
+        raise ConfigEntryNotReady(f"Initial update failed: {err}") from err
 
     if not coordinator.last_update_success:
-        raise ConfigEntryNotReady(f"Erst-Update nicht erfolgreich: {host}")
+        raise ConfigEntryNotReady(f"Initial update not successful: {host}")
 
-    # Speichere den Coordinator und API-Client in hass.data für Plattformen
+    # Store coordinator and API client in hass.data for platforms
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {
         "coordinator": coordinator,
@@ -56,7 +75,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         "name": name,
     }
 
-    # Gerät in Device Registry eintragen
+    # Register device in device registry
     device_registry = dr.async_get(hass)
     device_registry.async_get_or_create(
         config_entry_id=entry.entry_id,
@@ -67,13 +86,16 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         sw_version=coordinator.data.get("version", ""),
     )
 
-    # Plattformen laden (nur Sensor + Button, falls gewünscht)
+    # Load platforms (sensor + button if desired)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    """Wird aufgerufen, wenn der Config Entry entfernt wird."""
+    """Called when the config entry is removed."""
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
     return unload_ok
+
+async def async_setup_options_flow(hass, entry):
+    return AxeOSOptionsFlowHandler(entry)

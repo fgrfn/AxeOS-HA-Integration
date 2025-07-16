@@ -1,4 +1,4 @@
-# AxeOS-HA-Integration *STILL IN ALPHA*
+# AxeOS-HA-Integration
 
 A Home Assistant custom integration for monitoring and controlling BitAxe miners running AxeOS.
 
@@ -6,49 +6,49 @@ A Home Assistant custom integration for monitoring and controlling BitAxe miners
 
 ## Overview
 
-**AxeOS-HA-Integration** lets you integrate your BitAxe (AxeOS) Bitcoin miners directly into Home Assistant. Once installed, you can:
+**AxeOS-HA-Integration** allows you to integrate your BitAxe (AxeOS) Bitcoin miners directly into Home Assistant.  
+Key features include:
 
-- **Fetch real-time system metrics** such as power consumption, voltage, temperature, hashrate, uptime, and more.
-- **Restart miners** with a single button click inside Home Assistant.
-- **Register each miner as a device** in Home Assistant’s Device Registry.
-- **Create automations and dashboards** based on live miner data—no need to open a separate web UI.
-
-This integration works over your local network (HTTP) and is designed for simplicity, stability, and extensibility.
+- Real-time system metrics (power, voltage, temperature, hashrate, uptime, etc.)
+- Miner restart via button or automation
+- Device registration in Home Assistant
+- Flexible configuration via the Home Assistant UI
+- Advanced diagnostics and statistics
+- Multi-miner support
 
 ---
 
 ## Features
 
-- **System Metrics**
-  - Power (W)
-  - Voltage (mV)
-  - Current (mA)
-  - Chip temperature (°C)
-  - VRM temperature (°C)
-  - Maximum power (W)
-  - Nominal voltage (V)
-  - Current and expected hashrate (H/s)
-  - Shares accepted / rejected
-  - Uptime (seconds)
-  - Wi-Fi signal strength (dBm)
-  - Free heap memory (bytes)
-  - Fan speed (percentage and RPM)
-  - Core frequency (MHz)
-  - Core voltage (target / actual in mV)
-  - ASIC count and model
-  - Firmware version, board version, hostname, MAC address, Wi-Fi status
+- **System Metrics:**  
+  Power, voltage, current, chip temperature, VRM temperature, max power, nominal voltage, hashrate, shares accepted/rejected, uptime, Wi-Fi signal strength, free heap, fan speed, frequency, core voltage, ASIC count/model, firmware version, board version, hostname, MAC address, Wi-Fi status, and more.
 
-- **Restart Button**  
-  A dedicated button entity to reboot the miner via a POST request.
+- **Restart Button:**  
+  Instantly reboot your miner from Home Assistant (button entity and service).
 
-- **Device Registration**  
-  Automatically registers each miner in the Device Registry, grouping all related entities under one device.
+- **Connection Status Sensor:**  
+  Shows if the miner is online or offline.
 
-- **Config Flow**  
-  Easy setup through Home Assistant’s Integrations UI—just enter IP (or hostname) and an optional name.
+- **Statistics:**  
+  Historical min/max/average hashrate available as sensor attributes.
 
-- **HACS-Compatible**  
-  Install, update, and manage the integration directly from Home Assistant Community Store.
+- **Device Registration:**  
+  Each miner is registered as a device, grouping all related entities.
+
+- **Flexible UI Options:**  
+  Configure scan interval, logging level, and hide specific sensors directly from the UI.
+
+- **Advanced Diagnostics:**  
+  Last error status and rejected share reasons shown as sensor attributes.
+
+- **Multi-Miner Support:**  
+  Add as many miners as you want—each appears as a separate integration.
+
+- **Internationalization:**  
+  UI texts are translatable via `strings.json`.
+
+- **HACS-Compatible:**  
+  Easy installation and updates via Home Assistant Community Store.
 
 ---
 
@@ -56,95 +56,61 @@ This integration works over your local network (HTTP) and is designed for simpli
 
 ### HACS (Recommended)
 
-1. Add this repository to HACS as a **Custom Repository**:  
-   - Go to **HACS → Settings → Custom Repositories**.  
-   - Enter the repository URL:  
-     ```
-     https://github.com/fgrfn/AxeOS-HA-Integration
-     ```  
-   - Select **Integration** as the category and click **Add**.
-
-2. Once added, go to **HACS → Integrations**, search for **AxeOS-HA-Integration**, and click **Install**.
-
-3. Restart Home Assistant.
-
-4. Navigate to **Settings → Integrations → + Add Integration** and search for **AxeOS-HA-Integration**. Enter your miner’s IP or hostname and an optional name.
+1. Add this repository to HACS as a **Custom Repository**:
+   - Go to **HACS → Settings → Custom Repositories**
+   - Enter: `https://github.com/fgrfn/AxeOS-HA-Integration`
+   - Select **Integration** and click **Add**
+2. Go to **HACS → Integrations**, search for **AxeOS-HA-Integration**, and click **Install**
+3. Restart Home Assistant
 
 ### Manual Installation
 
 1. Download or clone the repository:
    ```bash
-   git clone https://github.com/fgrfn/ha-axeos-integration.git
+   git clone https://github.com/fgrfn/AxeOS-HA-Integration.git
    ```
-
-2. Copy the `axeos_ha` folder into your Home Assistant `custom_components` directory:
+2. Copy the `axeos_ha_integration` folder into your Home Assistant `custom_components` directory:
    ```
-   /config/custom_components/axeos_ha/
+   /config/custom_components/axeos_ha_integration/
    ```
-
-3. Restart Home Assistant.
-
-4. Go to **Settings → Integrations → + Add Integration** and search for **AxeOS-HA-Integration**. Enter IP or hostname and an optional name.
+3. Restart Home Assistant
 
 ---
 
 ## Configuration
 
-After installation, configure each miner through the UI:
+Configure each miner via the Home Assistant UI:
 
-1. **Settings → Integrations → + Add Integration → AxeOS-HA-Integration**  
-2. Enter the **Host** (IP address or hostname) of your AxeOS miner.  
-3. (Optional) Enter a **Name** for display; defaults to the host if left blank.  
-4. Click **Submit**.  
-5. The integration will attempt to fetch `/api/system/info`. If successful, Home Assistant will create sensors and a restart button for that miner.
+1. Go to **Settings → Integrations → + Add Integration → AxeOS-HA-Integration**
+2. Enter the **Host** (IP address or hostname) and an optional **Name**
+3. Submit the form
+4. The integration will fetch `/api/system/info` and create all relevant entities
 
-You can add multiple miners—each will appear under its own entry.
+### Options
+
+After setup, you can adjust:
+
+- **Scan Interval:** How often data is polled (seconds)
+- **Logging Level:** Debug, info, warning, error
+- **Hide Temperature Sensors:** Optionally hide chip/VRM temperature sensors
 
 ---
 
-## Entity List
+## Entities
 
-When you add a miner, the following entities are created (example for miner named “Gamma”):
+Each miner provides:
 
-- **Sensors**  
-  - `sensor.gamma_power` – Power consumption (W)  
-  - `sensor.gamma_voltage` – Voltage (mV)  
-  - `sensor.gamma_current` – Current (mA)  
-  - `sensor.gamma_temp` – Chip temperature (°C)  
-  - `sensor.gamma_vrTemp` – VRM temperature (°C)  
-  - `sensor.gamma_maxPower` – Maximum power (W)  
-  - `sensor.gamma_nominalVoltage` – Nominal voltage (V)  
-  - `sensor.gamma_hashRate` – Current hashrate (H/s)  
-  - `sensor.gamma_expectedHashrate` – Expected hashrate (H/s)  
-  - `sensor.gamma_sharesAccepted` – Shares accepted  
-  - `sensor.gamma_sharesRejected` – Shares rejected  
-  - `sensor.gamma_uptimeSeconds` – Uptime (seconds)  
-  - `sensor.gamma_wifiRSSI` – Wi-Fi signal strength (dBm)  
-  - `sensor.gamma_freeHeap` – Free heap memory (bytes)  
-  - `sensor.gamma_fanspeed` – Fan speed (%)  
-  - `sensor.gamma_fanrpm` – Fan RPM  
-  - `sensor.gamma_frequency` – Core frequency (MHz)  
-  - `sensor.gamma_coreVoltage` – Core voltage (target, mV)  
-  - `sensor.gamma_coreVoltageActual` – Core voltage (actual, mV)  
-  - `sensor.gamma_asicCount` – ASIC count  
-  - `sensor.gamma_smallCoreCount` – Total core count  
-  - `sensor.gamma_ASICModel` – ASIC model  
-  - `sensor.gamma_version` – Firmware version  
-  - `sensor.gamma_ssid` – Wi-Fi SSID  
-  - `sensor.gamma_macAddr` – MAC address  
-  - `sensor.gamma_hostname` – Hostname  
-  - `sensor.gamma_wifiStatus` – Wi-Fi status  
+- **Sensors:**  
+  All system metrics listed above, plus connection status and historical statistics
 
-- **Button**  
-  - `button.gamma_restart` – Reboot the miner
+- **Button:**  
+  Restart the miner
 
 ---
 
 ## Usage Examples
 
-### Automations
-
-#### 1. Restart on Overheat
+### Automation: Restart on Overheat
 
 ```yaml
 alias: "Restart Miner on Overheat"
@@ -158,7 +124,7 @@ action:
       entity_id: button.gamma_restart
 ```
 
-#### 2. Notify on Low Hashrate
+### Automation: Notify on Low Hashrate
 
 ```yaml
 alias: "Notify on Low Hashrate"
@@ -173,7 +139,7 @@ action:
       message: "Miner Gamma hashrate dropped below 1500 H/s"
 ```
 
-### Lovelace Dashboard
+### Lovelace Dashboard Example
 
 ```yaml
 cards:
@@ -184,10 +150,23 @@ cards:
       - sensor.gamma_hashRate
       - sensor.gamma_temp
       - sensor.gamma_uptimeSeconds
+      - sensor.gamma_connection_status
       - button.gamma_restart
 ```
+
+---
+
+## Troubleshooting
+
+- **Cannot connect:**  
+  Check the IP address/hostname and network connectivity.
+- **No entities created:**  
+  Ensure the miner is running AxeOS and the API is reachable.
+- **Errors shown in sensors:**  
+  See the `last_error` attribute for details.
+
 ---
 
 ## License
 
-This project is released under the [MIT License](LICENSE).  
+Released under the [MIT License](LICENSE)

@@ -7,15 +7,15 @@ from .const import API_SYSTEM_INFO
 _LOGGER = logging.getLogger(__name__)
 
 class AxeOSAPI:
-    """Client-Klasse, um mit einem AxeOS‐Miner via HTTP zu kommunizieren.
-       Nur das Endpunkt /api/system/info wird abgefragt."""
+    """Client class to communicate with an AxeOS miner via HTTP.
+       Only the /api/system/info endpoint is queried."""
 
     def __init__(self, session: aiohttp.ClientSession, host: str):
         self._session = session
         self._base_url = f"http://{host}"
 
     async def get_system_info(self) -> dict | None:
-        """Holt die System-Info (GET /api/system/info)."""
+        """Fetches system info (GET /api/system/info)."""
         url = f"{self._base_url}{API_SYSTEM_INFO}"
         try:
             async with async_timeout.timeout(10):
@@ -23,5 +23,4 @@ class AxeOSAPI:
                 resp.raise_for_status()
                 return await resp.json()
         except Exception as ex:
-            _LOGGER.error("Fehler beim Abruf von System Info von %s: %s", url, ex)
-            return None
+            _LOGGER.error("Error fetching system info from %s: %s", url, ex)
