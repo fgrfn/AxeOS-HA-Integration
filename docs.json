@@ -1,0 +1,22 @@
+{
+  "logo": "icon.png",
+  "favicon": "icon.png",
+  "pages": [
+    {
+      "title": "Installation",
+      "path": "docs/installation.md"
+    },
+    {
+      "title": "Configuration",
+      "path": "docs/configuration.md"
+    },
+    {
+      "title": "FAQ",
+      "path": "docs/faq.md"
+    },
+    {
+      "title": "Release Notes",
+      "path": "release_notes.md"
+    }
+  ]
+}
