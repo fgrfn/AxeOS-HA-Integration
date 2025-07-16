@@ -20,99 +20,89 @@ _LOGGER = logging.getLogger(__name__)
 # value: Tuple (name suffix, unit, data_path)
 # data_path: key in coordinator.data (e.g. "power", "voltage", "hashRate", etc.)
 # -------------------------------------------------------------------------
-SENSOR_TYPES: dict[str, tuple[str, str | None, str]] = {
-    "power": ("Power Consumption", "W", "power"),
-    "voltage": ("Voltage", "mV", "voltage"),
-    "current": ("Current", "mA", "current"),
-    "temp": ("Chip Temperature", "°C", "temp"),
-    "vrTemp": ("VR Temperature", "°C", "vrTemp"),
-    "maxPower": ("Max Power", "W", "maxPower"),
-    "nominalVoltage": ("Nominal Voltage", "V", "nominalVoltage"),
-    "hashRate": ("Current Hashrate", "H/s", "hashRate"),
-    "expectedHashrate": ("Expected Hashrate", "H/s", "expectedHashrate"),
-    "bestDiff": ("Best Difficulty", None, "bestDiff"),
-    "bestSessionDiff": ("Best Session Difficulty", None, "bestSessionDiff"),
-    "poolDifficulty": ("Pool Difficulty", None, "poolDifficulty"),
-    "isUsingFallbackStratum": ("Fallback Stratum Active", None, "isUsingFallbackStratum"),
-    "isPSRAMAvailable": ("PSRAM Available", None, "isPSRAMAvailable"),
-    "freeHeap": ("Free Heap", "Bytes", "freeHeap"),
-    "coreVoltage": ("Core Voltage Target", "mV", "coreVoltage"),
-    "coreVoltageActual": ("Core Voltage Actual", "mV", "coreVoltageActual"),
-    "frequency": ("Frequency", "MHz", "frequency"),
-    "ssid": ("WiFi SSID", None, "ssid"),
-    "macAddr": ("MAC Address", None, "macAddr"),
-    "hostname": ("Hostname", None, "hostname"),
-    "wifiStatus": ("WiFi Status", None, "wifiStatus"),
-    "wifiRSSI": ("WiFi Signal Strength", "dBm", "wifiRSSI"),
-    "apEnabled": ("Access Point Enabled", None, "apEnabled"),
-    "sharesAccepted": ("Accepted Shares", None, "sharesAccepted"),
-    "sharesRejected": ("Rejected Shares", None, "sharesRejected"),
-    "uptimeSeconds": ("Uptime", "s", "uptimeSeconds"),
-    "smallCoreCount": ("Total Core Count", None, "smallCoreCount"),
-    "asicCount": ("ASIC Count", None, "asicCount"),
-    "ASICModel": ("ASIC Model", None, "ASICModel"),
-    "stratumURL": ("Stratum URL", None, "stratumURL"),
-    "stratumPort": ("Stratum Port", None, "stratumPort"),
-    "stratumUser": ("Stratum User", None, "stratumUser"),
-    "stratumSuggestedDifficulty": ("Stratum Difficulty", None, "stratumSuggestedDifficulty"),
-    "stratumExtranonceSubscribe": ("Stratum Extranonce Subscribe", None, "stratumExtranonceSubscribe"),
-    "fallbackStratumURL": ("Fallback Stratum URL", None, "fallbackStratumURL"),
-    "fallbackStratumPort": ("Fallback Stratum Port", None, "fallbackStratumPort"),
-    "fallbackStratumUser": ("Fallback Stratum User", None, "fallbackStratumUser"),
-    "fallbackStratumSuggestedDifficulty": ("Fallback Stratum Difficulty", None, "fallbackStratumSuggestedDifficulty"),
-    "fallbackStratumExtranonceSubscribe": ("Fallback Stratum Extranonce Subscribe", None, "fallbackStratumExtranonceSubscribe"),
-    "responseTime": ("API Response Time", "ms", "responseTime"),
-    "version": ("Firmware Version", None, "version"),
-    "axeOSVersion": ("AxeOS Version", None, "axeOSVersion"),
-    "idfVersion": ("IDF Version", None, "idfVersion"),
-    "boardVersion": ("Board Version", None, "boardVersion"),
-    "runningPartition": ("Running Partition", None, "runningPartition"),
-    "overheat_mode": ("Overheat Mode", None, "overheat_mode"),
-    "overclockEnabled": ("Overclock Enabled", None, "overclockEnabled"),
-    "display": ("Display", None, "display"),
-    "rotation": ("Display Rotation", None, "rotation"),
-    "invertscreen": ("Invert Screen", None, "invertscreen"),
-    "displayTimeout": ("Display Timeout", "s", "displayTimeout"),
-    "autofanspeed": ("Auto Fan Speed", None, "autofanspeed"),
-    "fanspeed": ("Fan Speed (%)", "%", "fanspeed"),
-    "fanrpm": ("Fan RPM", "RPM", "fanrpm"),
-    "temptarget": ("Temperature Target", "°C", "temptarget"),
-    "statsFrequency": ("Stats Frequency", "s", "statsFrequency"),
+SENSOR_TYPES: dict[str, tuple[str, str | None, list[str]]] = {
+    "power": ("Power Consumption", "W", ["power"]),
+    "voltage": ("Voltage", "mV", ["voltage"]),
+    "current": ("Current", "mA", ["current"]),
+    "temp": ("Chip Temperature", "°C", ["temp"]),
+    "vrTemp": ("VR Temperature", "°C", ["vrTemp"]),
+    "maxPower": ("Max Power", "W", ["maxPower"]),
+    "nominalVoltage": ("Nominal Voltage", "V", ["nominalVoltage"]),
+    "hashRate": ("Current Hashrate", "H/s", ["hashRate"]),
+    "expectedHashrate": ("Expected Hashrate", "H/s", ["expectedHashrate"]),
+    "bestDiff": ("Best Difficulty", None, ["bestDiff"]),
+    "bestSessionDiff": ("Best Session Difficulty", None, ["bestSessionDiff"]),
+    "poolDifficulty": ("Pool Difficulty", None, ["poolDifficulty"]),
+    "isUsingFallbackStratum": ("Fallback Stratum Active", None, ["isUsingFallbackStratum"]),
+    "isPSRAMAvailable": ("PSRAM Available", None, ["isPSRAMAvailable"]),
+    "freeHeap": ("Free Heap", "Bytes", ["freeHeap"]),
+    "coreVoltage": ("Core Voltage Target", "mV", ["coreVoltage"]),
+    "coreVoltageActual": ("Core Voltage Actual", "mV", ["coreVoltageActual"]),
+    "frequency": ("Frequency", "MHz", ["frequency"]),
+    "ssid": ("WiFi SSID", None, ["ssid"]),
+    "macAddr": ("MAC Address", None, ["macAddr"]),
+    "hostname": ("Hostname", None, ["hostname"]),
+    "wifiStatus": ("WiFi Status", None, ["wifiStatus"]),
+    "wifiRSSI": ("WiFi Signal Strength", "dBm", ["wifiRSSI"]),
+    "apEnabled": ("Access Point Enabled", None, ["apEnabled"]),
+    "sharesAccepted": ("Accepted Shares", None, ["sharesAccepted"]),
+    "sharesRejected": ("Rejected Shares", None, ["sharesRejected"]),
+    "uptimeSeconds": ("Uptime", "s", ["uptimeSeconds"]),
+    "smallCoreCount": ("Total Core Count", None, ["smallCoreCount"]),
+    "asicCount": ("ASIC Count", None, ["asicCount"]),
+    "ASICModel": ("ASIC Model", None, ["ASICModel"]),
+    "stratumURL": ("Stratum URL", None, ["stratumURL"]),
+    "stratumPort": ("Stratum Port", None, ["stratumPort"]),
+    "stratumUser": ("Stratum User", None, ["stratumUser"]),
+    "stratumSuggestedDifficulty": ("Stratum Difficulty", None, ["stratumSuggestedDifficulty"]),
+    "stratumExtranonceSubscribe": ("Stratum Extranonce Subscribe", None, ["stratumExtranonceSubscribe"]),
+    "fallbackStratumURL": ("Fallback Stratum URL", None, ["fallbackStratumURL"]),
+    "fallbackStratumPort": ("Fallback Stratum Port", None, ["fallbackStratumPort"]),
+    "fallbackStratumUser": ("Fallback Stratum User", None, ["fallbackStratumUser"]),
+    "fallbackStratumSuggestedDifficulty": ("Fallback Stratum Difficulty", None, ["fallbackStratumSuggestedDifficulty"]),
+    "fallbackStratumExtranonceSubscribe": ("Fallback Stratum Extranonce Subscribe", None, ["fallbackStratumExtranonceSubscribe"]),
+    "responseTime": ("API Response Time", "ms", ["responseTime"]),
+    "version": ("Firmware Version", None, ["version"]),
+    "axeOSVersion": ("AxeOS Version", None, ["axeOSVersion"]),
+    "idfVersion": ("IDF Version", None, ["idfVersion"]),
+    "boardVersion": ("Board Version", None, ["boardVersion", "deviceModel"]),
+    "runningPartition": ("Running Partition", None, ["runningPartition"]),
+    "overheat_mode": ("Overheat Mode", None, ["overheat_mode"]),
+    "overclockEnabled": ("Overclock Enabled", None, ["overclockEnabled"]),
+    "display": ("Display", None, ["display"]),
+    "rotation": ("Display Rotation", None, ["rotation", "flipscreen"]),
+    "invertscreen": ("Invert Screen", None, ["invertscreen"]),
+    "displayTimeout": ("Display Timeout", "s", ["displayTimeout", "autoscreenoff"]),
+    "autofanspeed": ("Auto Fan Speed", None, ["autofanspeed"]),
+    "fanspeed": ("Fan Speed (%)", "%", ["fanspeed"]),
+    "fanrpm": ("Fan RPM", "RPM", ["fanrpm"]),
+    "temptarget": ("Temperature Target", "°C", ["temptarget"]),
+    "statsFrequency": ("Stats Frequency", "s", ["statsFrequency"]),
     # Complex fields like "sharesRejectedReasons" can be represented as JSON string:
-    "sharesRejectedReasons": ("Rejected Shares Reasons", None, "sharesRejectedReasons"),
+    "sharesRejectedReasons": ("Rejected Shares Reasons", None, ["sharesRejectedReasons"]),
 }
+
+def get_value(data, keys):
+    for key in keys:
+        if key in data:
+            return data[key]
+    return None
 
 async def async_setup_entry(
     hass: HomeAssistant,
     entry: ConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    """Set up sensor entities for each configured miner."""
     coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
-    miner_name = hass.data[DOMAIN][entry.entry_id]["name"]
+    data = coordinator.data
 
-    entities: list[SensorEntity] = []
-    for key, (suffix, unit, data_path) in SENSOR_TYPES.items():
-        if entry.options.get("hide_temp_sensor", False) and key in ("temp", "vrTemp"):
-            continue
-        entities.append(
-            AxeOSHASensor(
-                coordinator=coordinator,
-                entry_id=entry.entry_id,
-                miner_name=miner_name,
-                sensor_key=key,
-                suffix=suffix,
-                unit=unit,
-                data_path=data_path,
-            )
-        )
-    entities.append(
-        AxeOSConnectionStatusSensor(coordinator, entry.entry_id, miner_name)
-    )
+    entities = []
+    for key, (name, unit, keys) in SENSOR_TYPES.items():
+        value = get_value(data, keys)
+        if value is not None:
+            entities.append(AxeOSHASensor(coordinator, entry.entry_id, name, key, unit))
 
-    scan_interval = entry.options.get("scan_interval", DEFAULT_SCAN_INTERVAL)
-
-    async_add_entities(entities, update_before_add=True)
+    async_add_entities(entities)
 
 
 class AxeOSHASensor(CoordinatorEntity, SensorEntity):
@@ -128,7 +118,7 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         sensor_key: str,
         suffix: str,
         unit: str | None,
-        data_path: str,
+        data_path: list[str],
     ) -> None:
         """Initialize the sensor."""
         super().__init__(coordinator)
@@ -142,7 +132,7 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
         # data_path is now a simple key (e.g. "power" or "voltage")
-        self.data_key = data_path
+        self.data_keys = data_path
 
         # Unique ID: <host>_<sensor_key>, host can be from coordinator.data["hostname"]
         host = (coordinator.data.get("hostname") or entry_id).replace(" ", "_")
@@ -201,7 +191,7 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
     def _get_value_from_data(self) -> any:
         """Reads the value from coordinator.data using data_key."""
         data = self.coordinator.data
-        return data.get(self.data_key)
+        return get_value(data, self.data_keys)
 
     def _handle_coordinator_update(self) -> None:
         """Executed on every coordinator update."""

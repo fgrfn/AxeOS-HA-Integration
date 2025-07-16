@@ -28,6 +28,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Use shared aiohttp session from Home Assistant
     session = async_get_clientsession(hass)
     api = AxeOSAPI(session, host)
+    system_info = await api.get_system_info()
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {}

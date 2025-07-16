@@ -52,13 +52,16 @@ class AxeOSRestartButton(ButtonEntity):
 
     @property
     def device_info(self):
-        # Falls du boardVersion und version im Setup hast, übergib sie als Parameter!
+        # Flexibles Mapping für Modell und Version
+        info = getattr(self.api, "system_info", {})
+        model = info.get("boardVersion") or info.get("deviceModel") or "BitAxe Miner"
+        sw_version = info.get("version", "")
         return {
             "identifiers": {(DOMAIN, self.entry_id)},
             "name": self.miner_name,
             "manufacturer": "BitAxe",
-            "model": "BitAxe Miner",  # Fallback, falls keine Version verfügbar
-            "sw_version": "",         # Fallback, falls keine Version verfügbar
+            "model": model,
+            "sw_version": sw_version,
         }
 
 # Example for AxeOSAPI

@@ -14,17 +14,17 @@ class AxeOSAPI:
         # Remove protocol if already present
         if host.startswith("http://"):
             host = host[len("http://"):]
-        self._session = session
-        self._base_url = f"http://{host}"
+        self.session = session
+        self.host = host
+        self.system_info = {}
 
     async def get_system_info(self) -> dict | None:
         """Fetches system info (GET /api/system/info)."""
-        url = f"{self._base_url}/api/system/info"  # Ensure only one slash
-        try:
-            async with async_timeout.timeout(10):
-                resp = await self._session.get(url)
-                resp.raise_for_status()
-                return await resp.json()
-        except Exception as ex:
-            _LOGGER.error("Error fetching system info from %s: %s", url, ex)
+        url = f"http://{self.host}/api/system/info"  # Ensure only one slash
+        async with async_timeout.timeout(10):
+            resp = await self.session.get(url)
+            if resp.status == 200:
+                self.system_info = await resp.json()
+                return self.system_info
+            _LOGGER.error("Error fetching system info from %s: %s", url, resp.status)
             return None
