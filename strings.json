@@ -1,0 +1,29 @@
+{
+  "title": "AxeOS-HA-Integration",
+  "description": "Integration for BitAxe miners running AxeOS.",
+  "logo": "icon.png",
+  "config": {
+    "step": {
+      "user": {
+        "description": "Enter the IP address and name for your BitAxe miner.",
+        "data": {
+          "host": "Host (IP address)",
+          "name": "Name"
+        }
+      }
+    },
+    "error": {
+      "cannot_connect": "Could not connect to the miner.",
+      "invalid_host": "Invalid host address."
+    }
+  },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Scan interval (seconds)"
+        }
+      }
+    }
+  }
+}
