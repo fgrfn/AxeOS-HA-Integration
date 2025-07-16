@@ -118,6 +118,8 @@ async def async_setup_entry(
 class AxeOSHASensor(CoordinatorEntity, SensorEntity):
     """Generic sensor entity for an AxeOS-HA value (from system info only)."""
 
+    _attr_entity_registry_enabled_default = True
+
     def __init__(
         self,
         coordinator,

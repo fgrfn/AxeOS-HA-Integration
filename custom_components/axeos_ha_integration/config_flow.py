@@ -65,9 +65,15 @@ class AxeOSHaIntegrationConfigFlow(
                         data={CONF_HOST: host, CONF_NAME: name},
                     )
 
+        data_schema = vol.Schema({
+            vol.Required("host"): str,
+            vol.Required("name"): str,
+            vol.Optional("scan_interval", default=30): int,  # <--- Scan-Intervall hinzufügen
+        })
+
         return self.async_show_form(
             step_id="user",
-            data_schema=STEP_USER_DATA_SCHEMA,
+            data_schema=data_schema,
             errors=errors,
         )
 

@@ -50,12 +50,13 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         return system_info
 
+    scan_interval = entry.data.get("scan_interval", DEFAULT_SCAN_INTERVAL)
     coordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,
         name=f"{DOMAIN}_{host}",
         update_method=async_update_data,
-        update_interval=timedelta(seconds=entry.options.get("scan_interval", DEFAULT_SCAN_INTERVAL)),
+        update_interval=timedelta(seconds=scan_interval),
     )
 
     # Initial update to check connectivity
