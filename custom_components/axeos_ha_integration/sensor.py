@@ -98,12 +98,13 @@ async def async_setup_entry(
     host_id = str(host).replace(" ", "_").replace(".", "_").lower()
 
     entities: list[SensorEntity] = []
+    miner_name = coordinator.data.get("hostname", "BitAxe")
     for key, (suffix, unit, path) in SENSOR_TYPES.items():
-        name = f"{host_id} {suffix}".replace("_", " ").title()
-        unique_id = f"{host_id}_{key}"
+        name = f"{miner_name} {suffix}"
+        unique_id = f"{miner_name.lower()}_{key}"
         entities.append(
             AxeOSHASensor(
-                coordinator, entry.entry_id, name, unique_id, unit, path, host_id
+                coordinator, entry.entry_id, name, unique_id, unit, path, miner_name
             )
         )
 
