@@ -9,16 +9,10 @@ from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
-from .const import DOMAIN, DEFAULT_SCAN_INTERVAL
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-# -------------------------------------------------------------------------
-# SENSOR_TYPES: Mapping of relevant fields from /api/system/info to Home Assistant
-# key: internal identifier (unique_id suffix)
-# value: Tuple (name suffix, unit, data_path)
-# data_path: key in coordinator.data (e.g. "power", "voltage", "hashRate", etc.)
-# -------------------------------------------------------------------------
 SENSOR_TYPES: dict[str, tuple[str, str | None, list[str]]] = {
     "power": ("Power Consumption", "W", ["power"]),
     "voltage": ("Voltage", "mV", ["voltage"]),
@@ -77,15 +71,16 @@ SENSOR_TYPES: dict[str, tuple[str, str | None, list[str]]] = {
     "fanrpm": ("Fan RPM", "RPM", ["fanrpm"]),
     "temptarget": ("Temperature Target", "°C", ["temptarget"]),
     "statsFrequency": ("Stats Frequency", "s", ["statsFrequency"]),
-    # Complex fields like "sharesRejectedReasons" can be represented as JSON string:
     "sharesRejectedReasons": ("Rejected Shares Reasons", None, ["sharesRejectedReasons"]),
 }
+
 
 def get_value(data, keys):
     for key in keys:
         if key in data:
             return data[key]
     return None
+
 
 async def async_setup_entry(
     hass: HomeAssistant,
@@ -108,13 +103,16 @@ async def async_setup_entry(
             data_path,
         ))
 
+    entities.append(AxeOSConnectionStatusSensor(
+        coordinator,
+        entry.entry_id,
+        data.get("hostname", "BitAxe")
+    ))
+
     async_add_entities(entities)
 
+
 class AxeOSHASensor(CoordinatorEntity, SensorEntity):
-    """Generic sensor entity for an AxeOS-HA value (from system info only)."""
-
-    _attr_entity_registry_enabled_default = True
-
     def __init__(
         self,
         coordinator,
@@ -125,7 +123,6 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         unit: str | None,
         data_path: list[str],
     ) -> None:
-        """Initialize the sensor."""
         super().__init__(coordinator)
         self.entry_id = entry_id
         self.miner_name = miner_name
@@ -133,23 +130,17 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
 
         self._attr_name = f"{miner_name} {suffix}"
         self._attr_native_unit_of_measurement = unit
-        # self._attr_entity_category = EntityCategory.DIAGNOSTIC  # <----- ENTFERNT!
-
-        self.data_keys = data_path
-
-        host = (coordinator.data.get("hostname") or entry_id).replace(" ", "_")
-        self._attr_unique_id = f"{host}_{sensor_key}"
-
+        self._attr_unique_id = f"{(coordinator.data.get('hostname') or entry_id).replace(' ', '_')}_{sensor_key}"
+        self._attr_entity_registry_enabled_default = True  # Sensoren standardmäßig aktivieren
         self._state = None
+        self.data_keys = data_path
 
     @property
     def native_value(self):
-        """Returns the current value."""
         return self._state
 
     @property
     def device_class(self):
-        """Sets device_class if relevant."""
         if self.sensor_key in ("temp", "vrTemp"):
             return "temperature"
         if self.sensor_key == "uptimeSeconds":
@@ -160,7 +151,6 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
 
     @property
     def icon(self):
-        """Icon per sensor type."""
         icons = {
             "power": "mdi:flash",
             "voltage": "mdi:flash-auto",
@@ -190,38 +180,31 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         }
         return icons.get(self.sensor_key)
 
-    def _get_value_from_data(self) -> any:
-        """Reads the value from coordinator.data using data_key."""
+    def _get_value_from_data(self):
         data = self.coordinator.data
         return get_value(data, self.data_keys)
 
     def _handle_coordinator_update(self) -> None:
-        """Executed on every coordinator update."""
         self._state = self._get_value_from_data()
         self.async_write_ha_state()
 
     async def async_added_to_hass(self) -> None:
-        """When the entity is added: set initial value."""
         await super().async_added_to_hass()
         self._handle_coordinator_update()
 
     @property
     def extra_state_attributes(self):
-        """Return additional attributes for the sensor."""
         attrs = {}
 
-        # Show rejected reasons as attribute for the relevant sensor
         if self.sensor_key == "sharesRejectedReasons":
             value = self.coordinator.data.get(self.data_keys[0])
             if isinstance(value, list):
                 attrs["rejected_reasons"] = value
 
-        # Add last error status if available
         error = self.coordinator.data.get("last_error")
         if error:
             attrs["last_error"] = error
 
-        # Example: Add historical min/max/avg hash rate
         if self.sensor_key == "hashRate":
             history = self.coordinator.data.get("hashrate_history", [])
             if history:
@@ -243,16 +226,13 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
 
 
 class AxeOSConnectionStatusSensor(CoordinatorEntity, SensorEntity):
-    """Sensor to show if the miner is online."""
-
     def __init__(self, coordinator, entry_id, miner_name):
         super().__init__(coordinator)
         self._attr_name = f"{miner_name} Connection Status"
         self._attr_unique_id = f"{entry_id}_connection_status"
         self._attr_icon = "mdi:lan-connect"
-        # self._attr_entity_category = EntityCategory.DIAGNOSTIC  # <----- ENTFERNT!
+        self._attr_entity_registry_enabled_default = True  # Jetzt ebenfalls standardmäßig aktiv
 
     @property
     def native_value(self):
-        # You can set this in your coordinator or API code
         return "online" if not self.coordinator.data.get("last_error") else "offline"
