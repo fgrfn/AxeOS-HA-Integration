@@ -1,4 +1,4 @@
-# AxeOS-HA-Integration
+# AxeOS-HA-Integration *ALPHA*
 
 A Home Assistant custom integration for monitoring and controlling BitAxe miners running AxeOS.
 
