@@ -97,18 +97,16 @@ async def async_setup_entry(
 
     entities = []
     for key, (suffix, unit, data_path) in SENSOR_TYPES.items():
-        value = get_value(data, data_path)
-        if value is not None:
-            miner_name = data.get("hostname", "BitAxe")
-            entities.append(AxeOSHASensor(
-                coordinator,
-                entry.entry_id,
-                miner_name,
-                key,
-                suffix,
-                unit,
-                data_path,
-            ))
+        miner_name = data.get("hostname", "BitAxe")
+        entities.append(AxeOSHASensor(
+            coordinator,
+            entry.entry_id,
+            miner_name,
+            key,
+            suffix,
+            unit,
+            data_path,
+        ))
 
     async_add_entities(entities)
 
