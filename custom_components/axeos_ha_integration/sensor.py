@@ -97,13 +97,21 @@ async def async_setup_entry(
     data = coordinator.data
 
     entities = []
-    for key, (name, unit, keys) in SENSOR_TYPES.items():
-        value = get_value(data, keys)
+    for key, (suffix, unit, data_path) in SENSOR_TYPES.items():
+        value = get_value(data, data_path)
         if value is not None:
-            entities.append(AxeOSHASensor(coordinator, entry.entry_id, name, key, unit))
+            miner_name = data.get("hostname", "BitAxe")
+            entities.append(AxeOSHASensor(
+                coordinator,
+                entry.entry_id,
+                miner_name,
+                key,
+                suffix,
+                unit,
+                data_path,
+            ))
 
     async_add_entities(entities)
-
 
 class AxeOSHASensor(CoordinatorEntity, SensorEntity):
     """Generic sensor entity for an AxeOS-HA value (from system info only)."""
@@ -126,15 +134,12 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         self.miner_name = miner_name
         self.sensor_key = sensor_key
 
-        # Name: e.g. "BitAxe-Gamma Power Consumption"
         self._attr_name = f"{miner_name} {suffix}"
         self._attr_native_unit_of_measurement = unit
         self._attr_entity_category = EntityCategory.DIAGNOSTIC
 
-        # data_path is now a simple key (e.g. "power" or "voltage")
         self.data_keys = data_path
 
-        # Unique ID: <host>_<sensor_key>, host can be from coordinator.data["hostname"]
         host = (coordinator.data.get("hostname") or entry_id).replace(" ", "_")
         self._attr_unique_id = f"{host}_{sensor_key}"
 
@@ -210,7 +215,7 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
 
         # Show rejected reasons as attribute for the relevant sensor
         if self.sensor_key == "sharesRejectedReasons":
-            value = self.coordinator.data.get(self.data_key)
+            value = self.coordinator.data.get(self.data_keys[0])
             if isinstance(value, list):
                 attrs["rejected_reasons"] = value
 
