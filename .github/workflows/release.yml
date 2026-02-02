@@ -1,6 +1,11 @@
 name: Create Release
 
 on:
+  push:
+    branches:
+      - main
+    paths:
+      - 'custom_components/axeos_ha_integration/manifest.json'
   workflow_dispatch:
     inputs:
       version:
@@ -17,35 +22,58 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 2
 
-      - name: Update version
+      - name: Get version from manifest
+        id: version
         run: |
-          VERSION="${{ github.event.inputs.version }}"
-          
-          # Update manifest.json
+          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
+            VERSION="${{ github.event.inputs.version }}"
+          else
+            VERSION=$(jq -r '.version' custom_components/axeos_ha_integration/manifest.json)
+          fi
+          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
+          echo "Version: $VERSION"
+
+      - name: Check if tag exists
+        id: check_tag
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.VERSION }}" >/dev/null 2>&1; then
+            echo "exists=true" >> $GITHUB_OUTPUT
+          else
+            echo "exists=false" >> $GITHUB_OUTPUT
+          fi
+
+      - name: Update version (manual only)
+        if: github.event_name == 'workflow_dispatch'
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
           sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" custom_components/axeos_ha_integration/manifest.json
-          
-          # Update hacs.json if exists
           if [ -f hacs.json ]; then
             sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" hacs.json
           fi
-
-      - name: Commit & Tag
-        run: |
-          VERSION="${{ github.event.inputs.version }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git add .
-          git commit -m "Release v$VERSION" || echo "No changes to commit"
-          git tag "v$VERSION"
+          git diff --staged --quiet || git commit -m "chore: bump version to $VERSION"
           git push origin main
+
+      - name: Create Tag
+        if: steps.check_tag.outputs.exists == 'false'
+        run: |
+          VERSION="${{ steps.version.outputs.VERSION }}"
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git tag "v$VERSION"
           git push origin "v$VERSION"
 
       - name: Create GitHub Release
+        if: steps.check_tag.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ github.event.inputs.version }}
-          name: v${{ github.event.inputs.version }}
+          tag_name: v${{ steps.version.outputs.VERSION }}
+          name: v${{ steps.version.outputs.VERSION }}
           generate_release_notes: true
           draft: false
           prerelease: false
