@@ -31,6 +31,11 @@ class AxeOSHaIntegrationConfigFlow(
 
     VERSION = 1
 
+    @staticmethod
+    def async_get_options_flow(config_entry):
+        """Get the options flow for this handler."""
+        return AxeOSOptionsFlowHandler(config_entry)
+
     async def async_step_user(
         self, user_input: dict[str, any] | None = None
     ) -> FlowResult:

@@ -4,11 +4,16 @@
 from __future__ import annotations
 import logging
 
-from homeassistant.components.sensor import SensorEntity
+from homeassistant.components.sensor import (
+    SensorEntity,
+    SensorDeviceClass,
+    SensorStateClass,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
+from homeassistant.helpers.entity import EntityCategory
 
 from .const import DOMAIN, DEFAULT_SCAN_INTERVAL
 
@@ -17,63 +22,63 @@ _LOGGER = logging.getLogger(__name__)
 # -------------------------------------------------------------------------
 # SENSOR_TYPES: Mapping of relevant fields from /api/system/info to Home Assistant
 # key: internal identifier (unique_id suffix)
-# value: Tuple (name suffix, unit, data_path)
+# value: Tuple (name suffix, unit, data_path, device_class, state_class, entity_category)
 # data_path: key in coordinator.data (e.g. "power", "voltage", "hashRate", etc.)
 # -------------------------------------------------------------------------
-SENSOR_TYPES: dict[str, tuple[str, str | None, list[str]]] = {
-    "power": ("Power Consumption", "W", ["power"]),
-    "voltage": ("Voltage", "mV", ["voltage"]),
-    "current": ("Current", "mA", ["current"]),
-    "temp": ("Chip Temperature", "°C", ["temp"]),
-    "vrTemp": ("VR Temperature", "°C", ["vrTemp"]),
-    "maxPower": ("Max Power", "W", ["maxPower"]),
-    "nominalVoltage": ("Nominal Voltage", "V", ["nominalVoltage"]),
-    "hashRate": ("Current Hashrate", "H/s", ["hashRate"]),
-    "expectedHashrate": ("Expected Hashrate", "H/s", ["expectedHashrate"]),
-    "bestDiff": ("Best Difficulty", None, ["bestDiff"]),
-    "bestSessionDiff": ("Best Session Difficulty", None, ["bestSessionDiff"]),
-    "poolDifficulty": ("Pool Difficulty", None, ["poolDifficulty"]),
-    "stratumDifficulty": ("Stratum Difficulty", None, ["stratumDifficulty"]),
-    "isUsingFallbackStratum": ("Fallback Stratum Active", None, ["isUsingFallbackStratum"]),
-    "coreVoltage": ("Core Voltage Target", "mV", ["coreVoltage"]),
-    "coreVoltageActual": ("Core Voltage Actual", "mV", ["coreVoltageActual", "coreVoltageActualMV"]),
-    "frequency": ("Frequency", "MHz", ["frequency"]),
-    "ip": ("IP Address", None, ["ip"]),
-    "ssid": ("WiFi SSID", None, ["ssid"]),
-    "macAddr": ("MAC Address", None, ["macAddr"]),
-    "hostname": ("Hostname", None, ["hostname"]),
-    "wifiStatus": ("WiFi Status", None, ["wifiStatus"]),
-    "wifiRSSI": ("WiFi Signal Strength", "dBm", ["wifiRSSI"]),
-    "sharesAccepted": ("Accepted Shares", None, ["sharesAccepted"]),
-    "sharesRejected": ("Rejected Shares", None, ["sharesRejected"]),
-    "uptimeSeconds": ("Uptime", "s", ["uptimeSeconds"]),
-    "freeHeap": ("Free Heap Memory", "bytes", ["freeHeap"]),
-    "smallCoreCount": ("Total Core Count", None, ["smallCoreCount"]),
-    "asicCount": ("ASIC Count", None, ["asicCount"]),
-    "ASICModel": ("ASIC Model", None, ["ASICModel"]),
-    "stratumURL": ("Stratum URL", None, ["stratumURL"]),
-    "stratumPort": ("Stratum Port", None, ["stratumPort"]),
-    "stratumUser": ("Stratum User", None, ["stratumUser"]),
-    "fallbackStratumURL": ("Fallback Stratum URL", None, ["fallbackStratumURL"]),
-    "fallbackStratumPort": ("Fallback Stratum Port", None, ["fallbackStratumPort"]),
-    "fallbackStratumUser": ("Fallback Stratum User", None, ["fallbackStratumUser"]),
-    "fallbackStratumSuggestedDifficulty": ("Fallback Stratum Difficulty", None, ["fallbackStratumSuggestedDifficulty"]),
-    "fallbackStratumExtranonceSubscribe": ("Fallback Stratum Extranonce Subscribe", None, ["fallbackStratumExtranonceSubscribe"]),
-    "responseTime": ("API Response Time", "ms", ["responseTime"]),
-    "version": ("Firmware Version", None, ["version"]),
-    "axeOSVersion": ("AxeOS Version", None, ["axeOSVersion"]),
-    "idfVersion": ("IDF Version", None, ["idfVersion"]),
-    "boardVersion": ("Board Version", None, ["boardVersion", "deviceModel"]),
-    "overheat_mode": ("Overheat Mode", None, ["overheat_mode"]),
-    "autofanspeed": ("Auto Fan Speed", None, ["autofanspeed"]),
-    "fanspeed": ("Fan Speed (%)", "%", ["fanspeed"]),
-    "fanrpm": ("Fan RPM", "RPM", ["fanrpm"]),
-    "invertfanpolarity": ("Invert Fan Polarity", None, ["invertfanpolarity"]),
-    "flipscreen": ("Flip Screen", None, ["flipscreen"]),
-    "invertscreen": ("Invert Screen", None, ["invertscreen"]),
-    "temptarget": ("Temperature Target", "°C", ["temptarget"]),
-    "statsFrequency": ("Stats Frequency", "s", ["statsFrequency"]),
-    "sharesRejectedReasons": ("Rejected Shares Reasons", None, ["sharesRejectedReasons"]),
+SENSOR_TYPES: dict[str, tuple[str, str | None, list[str], SensorDeviceClass | None, SensorStateClass | None, EntityCategory | None]] = {
+    "power": ("Power Consumption", "W", ["power"], SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT, None),
+    "voltage": ("Voltage", "mV", ["voltage"], SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, None),
+    "current": ("Current", "mA", ["current"], SensorDeviceClass.CURRENT, SensorStateClass.MEASUREMENT, None),
+    "temp": ("Chip Temperature", "°C", ["temp"], SensorDeviceClass.TEMPERATURE, SensorStateClass.MEASUREMENT, None),
+    "vrTemp": ("VR Temperature", "°C", ["vrTemp"], SensorDeviceClass.TEMPERATURE, SensorStateClass.MEASUREMENT, None),
+    "maxPower": ("Max Power", "W", ["maxPower"], SensorDeviceClass.POWER, None, EntityCategory.CONFIG),
+    "nominalVoltage": ("Nominal Voltage", "V", ["nominalVoltage"], SensorDeviceClass.VOLTAGE, None, EntityCategory.CONFIG),
+    "hashRate": ("Current Hashrate", "H/s", ["hashRate"], None, SensorStateClass.MEASUREMENT, None),
+    "expectedHashrate": ("Expected Hashrate", "H/s", ["expectedHashrate"], None, None, EntityCategory.DIAGNOSTIC),
+    "bestDiff": ("Best Difficulty", None, ["bestDiff"], None, None, EntityCategory.DIAGNOSTIC),
+    "bestSessionDiff": ("Best Session Difficulty", None, ["bestSessionDiff"], None, None, EntityCategory.DIAGNOSTIC),
+    "poolDifficulty": ("Pool Difficulty", None, ["poolDifficulty"], None, None, EntityCategory.DIAGNOSTIC),
+    "stratumDifficulty": ("Stratum Difficulty", None, ["stratumDifficulty"], None, None, EntityCategory.DIAGNOSTIC),
+    "isUsingFallbackStratum": ("Fallback Stratum Active", None, ["isUsingFallbackStratum"], None, None, EntityCategory.DIAGNOSTIC),
+    "coreVoltage": ("Core Voltage Target", "mV", ["coreVoltage"], SensorDeviceClass.VOLTAGE, None, EntityCategory.CONFIG),
+    "coreVoltageActual": ("Core Voltage Actual", "mV", ["coreVoltageActual", "coreVoltageActualMV"], SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, None),
+    "frequency": ("Frequency", "MHz", ["frequency"], SensorDeviceClass.FREQUENCY, SensorStateClass.MEASUREMENT, None),
+    "ip": ("IP Address", None, ["ip"], None, None, EntityCategory.DIAGNOSTIC),
+    "ssid": ("WiFi SSID", None, ["ssid"], None, None, EntityCategory.DIAGNOSTIC),
+    "macAddr": ("MAC Address", None, ["macAddr"], None, None, EntityCategory.DIAGNOSTIC),
+    "hostname": ("Hostname", None, ["hostname"], None, None, EntityCategory.DIAGNOSTIC),
+    "wifiStatus": ("WiFi Status", None, ["wifiStatus"], None, None, EntityCategory.DIAGNOSTIC),
+    "wifiRSSI": ("WiFi Signal Strength", "dBm", ["wifiRSSI"], SensorDeviceClass.SIGNAL_STRENGTH, SensorStateClass.MEASUREMENT, EntityCategory.DIAGNOSTIC),
+    "sharesAccepted": ("Accepted Shares", None, ["sharesAccepted"], None, SensorStateClass.TOTAL_INCREASING, None),
+    "sharesRejected": ("Rejected Shares", None, ["sharesRejected"], None, SensorStateClass.TOTAL_INCREASING, None),
+    "uptimeSeconds": ("Uptime", "s", ["uptimeSeconds"], SensorDeviceClass.DURATION, SensorStateClass.TOTAL_INCREASING, EntityCategory.DIAGNOSTIC),
+    "freeHeap": ("Free Heap Memory", "bytes", ["freeHeap"], SensorDeviceClass.DATA_SIZE, SensorStateClass.MEASUREMENT, EntityCategory.DIAGNOSTIC),
+    "smallCoreCount": ("Total Core Count", None, ["smallCoreCount"], None, None, EntityCategory.DIAGNOSTIC),
+    "asicCount": ("ASIC Count", None, ["asicCount"], None, None, EntityCategory.DIAGNOSTIC),
+    "ASICModel": ("ASIC Model", None, ["ASICModel"], None, None, EntityCategory.DIAGNOSTIC),
+    "stratumURL": ("Stratum URL", None, ["stratumURL"], None, None, EntityCategory.CONFIG),
+    "stratumPort": ("Stratum Port", None, ["stratumPort"], None, None, EntityCategory.CONFIG),
+    "stratumUser": ("Stratum User", None, ["stratumUser"], None, None, EntityCategory.CONFIG),
+    "fallbackStratumURL": ("Fallback Stratum URL", None, ["fallbackStratumURL"], None, None, EntityCategory.CONFIG),
+    "fallbackStratumPort": ("Fallback Stratum Port", None, ["fallbackStratumPort"], None, None, EntityCategory.CONFIG),
+    "fallbackStratumUser": ("Fallback Stratum User", None, ["fallbackStratumUser"], None, None, EntityCategory.CONFIG),
+    "fallbackStratumSuggestedDifficulty": ("Fallback Stratum Difficulty", None, ["fallbackStratumSuggestedDifficulty"], None, None, EntityCategory.CONFIG),
+    "fallbackStratumExtranonceSubscribe": ("Fallback Stratum Extranonce Subscribe", None, ["fallbackStratumExtranonceSubscribe"], None, None, EntityCategory.CONFIG),
+    "responseTime": ("API Response Time", "ms", ["responseTime"], SensorDeviceClass.DURATION, SensorStateClass.MEASUREMENT, EntityCategory.DIAGNOSTIC),
+    "version": ("Firmware Version", None, ["version"], None, None, EntityCategory.DIAGNOSTIC),
+    "axeOSVersion": ("AxeOS Version", None, ["axeOSVersion"], None, None, EntityCategory.DIAGNOSTIC),
+    "idfVersion": ("IDF Version", None, ["idfVersion"], None, None, EntityCategory.DIAGNOSTIC),
+    "boardVersion": ("Board Version", None, ["boardVersion", "deviceModel"], None, None, EntityCategory.DIAGNOSTIC),
+    "overheat_mode": ("Overheat Mode", None, ["overheat_mode"], None, None, EntityCategory.DIAGNOSTIC),
+    "autofanspeed": ("Auto Fan Speed", None, ["autofanspeed"], None, None, EntityCategory.CONFIG),
+    "fanspeed": ("Fan Speed (%)", "%", ["fanspeed"], None, SensorStateClass.MEASUREMENT, None),
+    "fanrpm": ("Fan RPM", "RPM", ["fanrpm"], None, SensorStateClass.MEASUREMENT, None),
+    "invertfanpolarity": ("Invert Fan Polarity", None, ["invertfanpolarity"], None, None, EntityCategory.CONFIG),
+    "flipscreen": ("Flip Screen", None, ["flipscreen"], None, None, EntityCategory.CONFIG),
+    "invertscreen": ("Invert Screen", None, ["invertscreen"], None, None, EntityCategory.CONFIG),
+    "temptarget": ("Temperature Target", "°C", ["temptarget"], SensorDeviceClass.TEMPERATURE, None, EntityCategory.CONFIG),
+    "statsFrequency": ("Stats Frequency", "s", ["statsFrequency"], SensorDeviceClass.DURATION, None, EntityCategory.CONFIG),
+    "sharesRejectedReasons": ("Rejected Shares Reasons", None, ["sharesRejectedReasons"], None, None, EntityCategory.DIAGNOSTIC),
 }
 
 def get_value(data: dict, keys: list[str]) -> any:
@@ -96,7 +101,7 @@ async def async_setup_entry(
     hide_temp_sensors = entry.options.get("hide_temperature_sensors", False)
 
     entities: list[SensorEntity] = []
-    for key, (suffix, unit, path) in SENSOR_TYPES.items():
+    for key, (suffix, unit, path, device_class, state_class, entity_category) in SENSOR_TYPES.items():
         # Skip temperature sensors if option is enabled
         if hide_temp_sensors and key in ["temp", "vrTemp", "temptarget"]:
             continue
@@ -105,7 +110,8 @@ async def async_setup_entry(
         unique_id = f"{host_id}_{key}"
         entities.append(
             AxeOSHASensor(
-                coordinator, entry.entry_id, name, unique_id, unit, path, key
+                coordinator, entry.entry_id, name, unique_id, unit, path, key,
+                device_class, state_class, entity_category
             )
         )
 
@@ -126,12 +132,18 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         unit: str | None,
         data_keys: list[str],
         sensor_key: str = None,
+        device_class: SensorDeviceClass | None = None,
+        state_class: SensorStateClass | None = None,
+        entity_category: EntityCategory | None = None,
     ) -> None:
         super().__init__(coordinator)
         self.entry_id = entry_id
         self._attr_name = name
         self._attr_unique_id = unique_id
         self._attr_native_unit_of_measurement = unit
+        self._attr_device_class = device_class
+        self._attr_state_class = state_class
+        self._attr_entity_category = entity_category
         self.data_keys = data_keys
         self.sensor_key = sensor_key or (unique_id.split("_")[-1] if "_" in unique_id else unique_id)
         self._state = None
