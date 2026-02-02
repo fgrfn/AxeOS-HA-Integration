@@ -1,0 +1,81 @@
+name: Validate
+
+on:
+  push:
+    branches:
+      - main
+      - master
+  pull_request:
+
+jobs:
+  validate:
+    name: Validate Integration
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install Home Assistant
+        run: |
+          pip install homeassistant
+
+      - name: Validate manifest
+        run: |
+          python3 -c "
+          import json
+          with open('custom_components/axeos_ha_integration/manifest.json') as f:
+              manifest = json.load(f)
+          required_keys = ['domain', 'name', 'version', 'documentation', 'codeowners', 'config_flow', 'iot_class']
+          for key in required_keys:
+              assert key in manifest, f'Missing required key: {key}'
+          print('✓ Manifest is valid')
+          "
+
+      - name: Validate hacs.json
+        run: |
+          python3 -c "
+          import json
+          with open('hacs.json') as f:
+              hacs = json.load(f)
+          required_keys = ['name', 'render_readme']
+          for key in required_keys:
+              assert key in hacs, f'Missing required key: {key}'
+          print('✓ HACS configuration is valid')
+          "
+
+      - name: Check Python syntax
+        run: |
+          python3 -m py_compile custom_components/axeos_ha_integration/*.py
+
+      - name: Validate translations
+        run: |
+          for file in custom_components/axeos_ha_integration/translations/*.json; do
+            python3 -c "
+          import json
+          import sys
+          try:
+              with open('$file') as f:
+                  json.load(f)
+              print('✓ $file is valid JSON')
+          except json.JSONDecodeError as e:
+              print('✗ $file has invalid JSON: ' + str(e))
+              sys.exit(1)
+            "
+          done
+
+  hacs-validate:
+    name: HACS Validation
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: HACS validation
+        uses: hacs/action@main
+        with:
+          category: integration
