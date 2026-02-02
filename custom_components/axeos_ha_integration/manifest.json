@@ -1,13 +1,13 @@
 {
   "domain": "axeos_ha_integration",
   "name": "AxeOS HA Integration",
-  "version": "1.0.1",
-  "documentation": "https://github.com/fgrfn/AxeOS-HA-Integration",
-  "issue_tracker": "https://github.com/fgrfn/AxeOS-HA-Integration/issues",
-  "requirements": [],
-  "dependencies": [],
   "codeowners": ["@fgrfn"],
   "config_flow": true,
+  "dependencies": [],
+  "documentation": "https://github.com/fgrfn/AxeOS-HA-Integration",
+  "integration_type": "device",
   "iot_class": "local_polling",
-  "integration_type": "device"
+  "issue_tracker": "https://github.com/fgrfn/AxeOS-HA-Integration/issues",
+  "requirements": [],
+  "version": "1.0.1"
 }

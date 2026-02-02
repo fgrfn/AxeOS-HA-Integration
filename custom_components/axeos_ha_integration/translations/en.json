@@ -1,16 +1,18 @@
 {
-  "title": {
-    "config": {
-      "user": "Add AxeOS Miner"
-    }
-  },
-  "step": {
-    "user": {
-      "data": {
-        "host": "Miner IP or Hostname",
-        "name": "Name (optional)"
-      },
-      "description": "Please enter the IP address or hostname of your AxeOS Miner."
+  "config": {
+    "step": {
+      "user": {
+        "title": "Add AxeOS Miner",
+        "data": {
+          "host": "Miner IP or Hostname",
+          "name": "Name (optional)"
+        },
+        "description": "Please enter the IP address or hostname of your AxeOS Miner."
+      }
+    },
+    "error": {
+      "invalid_host": "Invalid host input.",
+      "cannot_connect": "Failed to connect to miner."
     }
   },
   "options": {
@@ -24,9 +26,5 @@
         "description": "Configure integration options."
       }
     }
-  },
-  "error": {
-    "invalid_host": "Invalid host input.",
-    "cannot_connect": "Failed to connect to miner."
   }
 }

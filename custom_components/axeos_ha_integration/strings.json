@@ -1,7 +1,4 @@
 {
-  "title": "AxeOS-HA-Integration",
-  "description": "Integration for BitAxe miners running AxeOS.",
-  "logo": "icon.png",
   "config": {
     "step": {
       "user": {
