@@ -7,6 +7,15 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.9] - 2025-02-03
+
+### Fixed
+- Changed unit of measurement from 'bytes' to 'B' for data_size sensors (freeHeap, freeHeapInt)
+- Removed invalid CONFIG entity category from 27 sensor entities (changed to DIAGNOSTIC)
+- Removed invalid CONFIG entity category from 5 binary sensor entities (screen/fan settings)
+- Fixed Home Assistant validation errors preventing entities from being added
+- All entities now comply with Home Assistant entity category requirements
+
 ## [1.0.8] - 2025-02-03
 
 ### Added
