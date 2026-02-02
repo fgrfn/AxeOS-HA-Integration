@@ -96,6 +96,10 @@ class AxeOSOptionsFlowHandler(config_entries.OptionsFlow):
                     "logging_level",
                     default=options.get("logging_level", "info"),
                 ): vol.In(["debug", "info", "warning", "error"]),
+                vol.Optional(
+                    "hide_temperature_sensors",
+                    default=options.get("hide_temperature_sensors", False),
+                ): bool,
             }
         )
 

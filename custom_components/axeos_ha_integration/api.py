@@ -2,7 +2,7 @@ import async_timeout
 import aiohttp
 import logging
 
-from .const import API_SYSTEM_INFO
+from .const import API_SYSTEM_INFO, API_SYSTEM_RESTART
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,3 +28,18 @@ class AxeOSAPI:
                 return self.system_info
             _LOGGER.error("Error fetching system info from %s: %s", url, resp.status)
             return None
+
+    async def restart_system(self) -> bool:
+        """Restarts the miner (POST /api/system/restart)."""
+        url = f"http://{self.host}/api/system/restart"
+        try:
+            async with async_timeout.timeout(10):
+                resp = await self.session.post(url)
+                if resp.status == 200:
+                    _LOGGER.info("Restart command sent successfully to %s", self.host)
+                    return True
+                _LOGGER.error("Error restarting miner at %s: %s", url, resp.status)
+                return False
+        except Exception as e:
+            _LOGGER.error("Exception when restarting miner at %s: %s", self.host, e)
+            return False

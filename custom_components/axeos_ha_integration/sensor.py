@@ -84,15 +84,22 @@ async def async_setup_entry(
     # stabile host-id aus entry.data oder entry_id
     host = entry.data.get("host") or entry.entry_id
     host_id = str(host).replace(" ", "_").replace(".", "_").lower()
+    
+    # Get options
+    hide_temp_sensors = entry.options.get("hide_temperature_sensors", False)
 
     entities: list[SensorEntity] = []
     miner_name = coordinator.data.get("hostname", "BitAxe")
     for key, (suffix, unit, path) in SENSOR_TYPES.items():
+        # Skip temperature sensors if option is enabled
+        if hide_temp_sensors and key in ["temp", "vrTemp", "temptarget"]:
+            continue
+            
         name = f"{miner_name} {suffix}"
         unique_id = f"{miner_name.lower()}_{key}"
         entities.append(
             AxeOSHASensor(
-                coordinator, entry.entry_id, name, unique_id, unit, path, miner_name
+                coordinator, entry.entry_id, name, unique_id, unit, path, miner_name, key
             )
         )
 
@@ -113,6 +120,7 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         unit: str | None,
         data_keys: list[str],
         host_id: str,
+        sensor_key: str = None,
     ) -> None:
         super().__init__(coordinator)
         self.entry_id = entry_id
@@ -121,6 +129,7 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         self._attr_native_unit_of_measurement = unit
         self.data_keys = data_keys
         self.host_id = host_id
+        self.sensor_key = sensor_key or (unique_id.split("_")[-1] if "_" in unique_id else unique_id)
         self._state = None
 
     @property

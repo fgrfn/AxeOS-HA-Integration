@@ -13,6 +13,18 @@
       "description": "Gebe die IP-Adresse oder den Hostnamen deines AxeOS Miners an."
     }
   },
+  "options": {
+    "step": {
+      "init": {
+        "data": {
+          "scan_interval": "Scan-Intervall (Sekunden)",
+          "logging_level": "Log-Level",
+          "hide_temperature_sensors": "Temperatursensoren ausblenden"
+        },
+        "description": "Integrations-Optionen konfigurieren."
+      }
+    }
+  },
   "error": {
     "invalid_host": "Ungültige Host-Angabe.",
     "cannot_connect": "Verbindung zum Miner fehlgeschlagen."

@@ -1,0 +1,81 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'
+
+jobs:
+  release:
+    name: Create Release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Get version from tag
+        id: get_version
+        run: echo "VERSION=${GITHUB_REF#refs/tags/v}" >> $GITHUB_OUTPUT
+
+      - name: Extract changelog for this version
+        id: changelog
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          # Extract changelog section for this version
+          CHANGELOG=$(awk "/## \[$VERSION\]/,/## \[/" CHANGELOG.md | sed '$d' | tail -n +2)
+          if [ -z "$CHANGELOG" ]; then
+            CHANGELOG=$(awk "/## \[Unreleased\]/,/## \[/" CHANGELOG.md | sed '$d' | tail -n +2)
+          fi
+          echo "CHANGELOG<<EOF" >> $GITHUB_OUTPUT
+          echo "$CHANGELOG" >> $GITHUB_OUTPUT
+          echo "EOF" >> $GITHUB_OUTPUT
+
+      - name: Update manifest.json version
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" custom_components/axeos_ha_integration/manifest.json
+
+      - name: Update hacs.json version
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" hacs.json
+
+      - name: Commit version updates
+        run: |
+          git config --local user.email "github-actions[bot]@users.noreply.github.com"
+          git config --local user.name "github-actions[bot]"
+          git add custom_components/axeos_ha_integration/manifest.json hacs.json
+          git diff --staged --quiet || git commit -m "chore: bump version to ${{ steps.get_version.outputs.VERSION }}"
+          git push origin HEAD:main || echo "No changes to push or not on main branch"
+
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: v${{ steps.get_version.outputs.VERSION }}
+          name: Release v${{ steps.get_version.outputs.VERSION }}
+          body: |
+            ## What's Changed
+            
+            ${{ steps.changelog.outputs.CHANGELOG }}
+            
+            ## Installation
+            
+            ### Via HACS (Recommended)
+            1. Add this repository to HACS as a custom repository
+            2. Search for "AxeOS-HA-Integration" and install
+            3. Restart Home Assistant
+            
+            ### Manual Installation
+            1. Download the release archive
+            2. Extract and copy `custom_components/axeos_ha_integration` to your Home Assistant config directory
+            3. Restart Home Assistant
+            
+            **Full Changelog**: https://github.com/${{ github.repository }}/blob/main/CHANGELOG.md
+          draft: false
+          prerelease: false
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
