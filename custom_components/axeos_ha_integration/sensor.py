@@ -32,17 +32,25 @@ SENSOR_TYPES: dict[str, tuple[str, str | None, list[str], SensorDeviceClass | No
     "temp": ("Chip Temperature", "°C", ["temp"], SensorDeviceClass.TEMPERATURE, SensorStateClass.MEASUREMENT, None),
     "vrTemp": ("VR Temperature", "°C", ["vrTemp"], SensorDeviceClass.TEMPERATURE, SensorStateClass.MEASUREMENT, None),
     "maxPower": ("Max Power", "W", ["maxPower"], SensorDeviceClass.POWER, None, EntityCategory.CONFIG),
+    "minPower": ("Min Power", "W", ["minPower"], SensorDeviceClass.POWER, None, EntityCategory.CONFIG),
+    "maxVoltage": ("Max Voltage", "V", ["maxVoltage"], SensorDeviceClass.VOLTAGE, None, EntityCategory.CONFIG),
+    "minVoltage": ("Min Voltage", "V", ["minVoltage"], SensorDeviceClass.VOLTAGE, None, EntityCategory.CONFIG),
     "nominalVoltage": ("Nominal Voltage", "V", ["nominalVoltage"], SensorDeviceClass.VOLTAGE, None, EntityCategory.CONFIG),
     "hashRate": ("Current Hashrate", "H/s", ["hashRate"], None, SensorStateClass.MEASUREMENT, None),
+    "hashRate_1m": ("Hashrate (1 minute)", "H/s", ["hashRate_1m"], None, SensorStateClass.MEASUREMENT, None),
+    "hashRate_10m": ("Hashrate (10 minutes)", "H/s", ["hashRate_10m"], None, SensorStateClass.MEASUREMENT, None),
+    "hashRate_1h": ("Hashrate (1 hour)", "H/s", ["hashRate_1h"], None, SensorStateClass.MEASUREMENT, None),
+    "hashRate_1d": ("Hashrate (1 day)", "H/s", ["hashRate_1d"], None, SensorStateClass.MEASUREMENT, None),
     "expectedHashrate": ("Expected Hashrate", "H/s", ["expectedHashrate"], None, None, EntityCategory.DIAGNOSTIC),
     "bestDiff": ("Best Difficulty", None, ["bestDiff"], None, None, EntityCategory.DIAGNOSTIC),
     "bestSessionDiff": ("Best Session Difficulty", None, ["bestSessionDiff"], None, None, EntityCategory.DIAGNOSTIC),
     "poolDifficulty": ("Pool Difficulty", None, ["poolDifficulty"], None, None, EntityCategory.DIAGNOSTIC),
     "stratumDifficulty": ("Stratum Difficulty", None, ["stratumDifficulty"], None, None, EntityCategory.DIAGNOSTIC),
     "coreVoltage": ("Core Voltage Target", "mV", ["coreVoltage"], SensorDeviceClass.VOLTAGE, None, EntityCategory.CONFIG),
+    "defaultCoreVoltage": ("Default Core Voltage", "mV", ["defaultCoreVoltage"], SensorDeviceClass.VOLTAGE, None, EntityCategory.CONFIG),
     "coreVoltageActual": ("Core Voltage Actual", "mV", ["coreVoltageActual", "coreVoltageActualMV"], SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, None),
     "frequency": ("Frequency", "MHz", ["frequency"], SensorDeviceClass.FREQUENCY, SensorStateClass.MEASUREMENT, None),
-    "ip": ("IP Address", None, ["ip"], None, None, EntityCategory.DIAGNOSTIC),
+    "ip": ("IP Address", None, ["ip", "hostip"], None, None, EntityCategory.DIAGNOSTIC),
     "ssid": ("WiFi SSID", None, ["ssid"], None, None, EntityCategory.DIAGNOSTIC),
     "macAddr": ("MAC Address", None, ["macAddr"], None, None, EntityCategory.DIAGNOSTIC),
     "hostname": ("Hostname", None, ["hostname"], None, None, EntityCategory.DIAGNOSTIC),
@@ -69,13 +77,57 @@ SENSOR_TYPES: dict[str, tuple[str, str | None, list[str], SensorDeviceClass | No
     "idfVersion": ("IDF Version", None, ["idfVersion"], None, None, EntityCategory.DIAGNOSTIC),
     "boardVersion": ("Board Version", None, ["boardVersion", "deviceModel"], None, None, EntityCategory.DIAGNOSTIC),
     "fanspeed": ("Fan Speed (%)", "%", ["fanspeed"], None, SensorStateClass.MEASUREMENT, None),
+    "manualFanSpeed": ("Manual Fan Speed", "%", ["manualFanSpeed"], None, SensorStateClass.MEASUREMENT, EntityCategory.CONFIG),
     "fanrpm": ("Fan RPM", "RPM", ["fanrpm"], None, SensorStateClass.MEASUREMENT, None),
-    "temptarget": ("Temperature Target", "°C", ["temptarget"], SensorDeviceClass.TEMPERATURE, None, EntityCategory.CONFIG),
+    "temptarget": ("Temperature Target", "°C", ["temptarget", "pidTargetTemp"], SensorDeviceClass.TEMPERATURE, None, EntityCategory.CONFIG),
+    "overheat_temp": ("Overheat Temperature", "°C", ["overheat_temp"], SensorDeviceClass.TEMPERATURE, None, EntityCategory.CONFIG),
     "statsFrequency": ("Stats Frequency", "s", ["statsFrequency"], SensorDeviceClass.DURATION, None, EntityCategory.CONFIG),
     "sharesRejectedReasons": ("Rejected Shares Reasons", None, ["sharesRejectedReasons"], None, None, EntityCategory.DIAGNOSTIC),
+    # NerdAxe specific sensors
+    "duplicateHWNonces": ("Duplicate HW Nonces", None, ["duplicateHWNonces"], None, SensorStateClass.TOTAL_INCREASING, EntityCategory.DIAGNOSTIC),
+    "foundBlocks": ("Found Blocks (Session)", None, ["foundBlocks"], None, SensorStateClass.TOTAL_INCREASING, None),
+    "totalFoundBlocks": ("Total Found Blocks", None, ["totalFoundBlocks"], None, SensorStateClass.TOTAL_INCREASING, None),
+    "defaultFrequency": ("Default Frequency", "MHz", ["defaultFrequency"], SensorDeviceClass.FREQUENCY, None, EntityCategory.CONFIG),
+    "vrFrequency": ("VR Frequency", "Hz", ["vrFrequency"], SensorDeviceClass.FREQUENCY, SensorStateClass.MEASUREMENT, EntityCategory.DIAGNOSTIC),
+    "defaultVrFrequency": ("Default VR Frequency", "Hz", ["defaultVrFrequency"], SensorDeviceClass.FREQUENCY, None, EntityCategory.CONFIG),
+    "jobInterval": ("Job Interval", "ms", ["jobInterval"], SensorDeviceClass.DURATION, None, EntityCategory.CONFIG),
+    "lastResetReason": ("Last Reset Reason", None, ["lastResetReason"], None, None, EntityCategory.DIAGNOSTIC),
+    "runningPartition": ("Running Partition", None, ["runningPartition"], None, None, EntityCategory.DIAGNOSTIC),
+    "defaultTheme": ("Default Theme", None, ["defaultTheme"], None, None, EntityCategory.CONFIG),
+    "freeHeapInt": ("Free Heap (Internal)", "bytes", ["freeHeapInt"], SensorDeviceClass.DATA_SIZE, SensorStateClass.MEASUREMENT, EntityCategory.DIAGNOSTIC),
+    # PID Controller values
+    "pidP": ("PID P Value", None, ["pidP"], None, None, EntityCategory.CONFIG),
+    "pidI": ("PID I Value", None, ["pidI"], None, None, EntityCategory.CONFIG),
+    "pidD": ("PID D Value", None, ["pidD"], None, None, EntityCategory.CONFIG),
+    # Stratum pool details (nested in stratum object for NerdAxe)
+    "stratum_poolMode": ("Pool Mode", None, ["stratum", "poolMode"], None, None, EntityCategory.DIAGNOSTIC),
+    "stratum_activePoolMode": ("Active Pool Mode", None, ["stratum", "activePoolMode"], None, None, EntityCategory.DIAGNOSTIC),
+    "stratum_poolBalance": ("Pool Balance", None, ["stratum", "poolBalance"], None, SensorStateClass.MEASUREMENT, EntityCategory.DIAGNOSTIC),
+    "stratum_totalBestDiff": ("Stratum Total Best Difficulty", None, ["stratum", "totalBestDiff"], None, SensorStateClass.TOTAL_INCREASING, EntityCategory.DIAGNOSTIC),
+    "stratum_poolDifficulty": ("Stratum Pool Difficulty", None, ["stratum", "poolDifficulty"], None, None, EntityCategory.DIAGNOSTIC),
 }
 
 def get_value(data: dict, keys: list[str]) -> any:
+    """Get value from data dict, supporting nested keys.
+    
+    keys can be either:
+    - Single strings like ["power", "voltage"] - tries each key
+    - Nested path like ["stratum", "poolMode"] - follows the path in order
+    """
+    if not keys:
+        return None
+    
+    # Check if this is a nested path (multi-element list where first element is a dict in data)
+    if len(keys) > 1 and keys[0] in data and isinstance(data[keys[0]], dict):
+        current = data
+        for k in keys:
+            if isinstance(current, dict) and k in current:
+                current = current[k]
+            else:
+                return None
+        return current
+    
+    # Otherwise, try each key as an alternative
     for key in keys:
         if key in data:
             return data[key]

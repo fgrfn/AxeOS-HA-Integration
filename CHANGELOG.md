@@ -7,6 +7,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.8] - 2025-02-03
+
+### Added
+- Full NerdAxe device support with 25+ additional sensors
+- Extended hashrate metrics (1 minute, 10 minutes, 1 hour, 1 day averages)
+- Min/Max power and voltage sensors for NerdAxe
+- PID controller value sensors (P, I, D values and target temperature)
+- Stratum pool details (pool mode, balance, total best difficulty)
+- Additional fan control (manual fan speed, fan RPM)
+- Hardware diagnostics (duplicate nonces, found blocks, reset reason)
+- VR frequency monitoring and configuration
+- Nested data path support for complex API structures
+
+### Improved
+- IP address sensor now supports both "ip" and "hostip" fields
+- Binary sensors support nested paths (e.g., stratum.usingFallback)
+- Better compatibility with both BitAxe and NerdAxe devices
+- Enhanced get_value() functions for nested data extraction
+
 ## [1.0.7] - 2025-02-03
 
 ### Added

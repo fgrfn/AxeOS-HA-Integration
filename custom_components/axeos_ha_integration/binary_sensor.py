@@ -20,25 +20,49 @@ _LOGGER = logging.getLogger(__name__)
 # Binary sensor definitions
 BINARY_SENSOR_TYPES: dict[str, tuple[str, list[str], BinarySensorDeviceClass | None, EntityCategory | None]] = {
     "overheat_mode": ("Overheat Mode", ["overheat_mode"], BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
-    "isUsingFallbackStratum": ("Using Fallback Stratum", ["isUsingFallbackStratum"], BinarySensorDeviceClass.CONNECTIVITY, EntityCategory.DIAGNOSTIC),
+    "isUsingFallbackStratum": ("Using Fallback Stratum", ["isUsingFallbackStratum", "stratum.usingFallback"], BinarySensorDeviceClass.CONNECTIVITY, EntityCategory.DIAGNOSTIC),
     "autofanspeed": ("Auto Fan Speed", ["autofanspeed"], None, EntityCategory.CONFIG),
     "invertfanpolarity": ("Invert Fan Polarity", ["invertfanpolarity"], None, EntityCategory.CONFIG),
     "flipscreen": ("Flip Screen", ["flipscreen"], None, EntityCategory.CONFIG),
     "invertscreen": ("Invert Screen", ["invertscreen"], None, EntityCategory.CONFIG),
+    # NerdAxe specific binary sensors
+    "shutdown": ("Shutdown", ["shutdown"], BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
+    "autoscreenoff": ("Auto Screen Off", ["autoscreenoff"], None, EntityCategory.CONFIG),
+    "stratum_keep": ("Keep Stratum Connection", ["stratum_keep"], BinarySensorDeviceClass.CONNECTIVITY, EntityCategory.CONFIG),
+    "otp": ("One-Time Programming", ["otp"], None, EntityCategory.DIAGNOSTIC),
+    "stratumEnonceSubscribe": ("Stratum Enonce Subscribe", ["stratumEnonceSubscribe"], None, EntityCategory.CONFIG),
+    "fallbackStratumEnonceSubscribe": ("Fallback Stratum Enonce Subscribe", ["fallbackStratumEnonceSubscribe"], None, EntityCategory.CONFIG),
 }
 
 def get_value(data: dict, keys: list[str]) -> bool | None:
-    """Get value from data dict, trying multiple keys."""
+    """Get value from data dict, trying multiple keys and supporting nested paths."""
     for key in keys:
-        if key in data:
+        # Handle nested keys like "stratum.usingFallback"
+        if "." in key:
+            parts = key.split(".")
+            current = data
+            for part in parts:
+                if isinstance(current, dict) and part in current:
+                    current = current[part]
+                else:
+                    current = None
+                    break
+            if current is not None:
+                val = current
+            else:
+                continue
+        elif key in data:
             val = data[key]
-            # Convert various representations to bool
-            if isinstance(val, bool):
-                return val
-            if isinstance(val, (int, float)):
-                return val != 0
-            if isinstance(val, str):
-                return val.lower() in ['true', '1', 'on', 'yes']
+        else:
+            continue
+        
+        # Convert various representations to bool
+        if isinstance(val, bool):
+            return val
+        if isinstance(val, (int, float)):
+            return val != 0
+        if isinstance(val, str):
+            return val.lower() in ['true', '1', 'on', 'yes']
     return None
 
 async def async_setup_entry(
