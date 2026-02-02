@@ -9,13 +9,14 @@ import logging
 
 from .const import DOMAIN, DEFAULT_SCAN_INTERVAL, CONF_HOST, CONF_NAME
 from .api import AxeOSAPI
+from .services import async_setup_services, async_unload_services
 
 def get_logger(level):
     logger = logging.getLogger(__name__)
     logger.setLevel(getattr(logging, level.upper(), logging.INFO))
     return logger
 
-PLATFORMS = ["sensor", "button"]  # keep button if desired
+PLATFORMS = ["sensor", "button", "binary_sensor", "number"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Called when a config entry is created or loaded."""
@@ -91,6 +92,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
     # Load platforms (sensor + button if desired)
     await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
+    
+    # Setup services
+    await async_setup_services(hass)
+    
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
@@ -98,4 +103,9 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     unload_ok = await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
+        
+        # Unload services if this is the last entry
+        if not hass.data[DOMAIN]:
+            await async_unload_services(hass)
+            
     return unload_ok

@@ -1,0 +1,69 @@
+# Services for AxeOS HA Integration
+
+restart_miner:
+  name: Restart Miner
+  description: Restart the BitAxe miner
+  target:
+    entity:
+      integration: axeos_ha_integration
+      domain: sensor
+  fields:
+    entity_id:
+      name: Entity
+      description: The miner entity to restart
+      required: true
+      selector:
+        entity:
+          integration: axeos_ha_integration
+
+set_frequency:
+  name: Set Frequency
+  description: Set the mining frequency (MHz)
+  target:
+    entity:
+      integration: axeos_ha_integration
+      domain: sensor
+  fields:
+    entity_id:
+      name: Entity
+      description: The miner entity
+      required: true
+      selector:
+        entity:
+          integration: axeos_ha_integration
+    frequency:
+      name: Frequency
+      description: Frequency in MHz (200-600)
+      required: true
+      selector:
+        number:
+          min: 200
+          max: 600
+          step: 25
+          unit_of_measurement: "MHz"
+
+set_voltage:
+  name: Set Voltage
+  description: Set the core voltage (mV)
+  target:
+    entity:
+      integration: axeos_ha_integration
+      domain: sensor
+  fields:
+    entity_id:
+      name: Entity
+      description: The miner entity
+      required: true
+      selector:
+        entity:
+          integration: axeos_ha_integration
+    voltage:
+      name: Voltage
+      description: Voltage in mV (1000-1400)
+      required: true
+      selector:
+        number:
+          min: 1000
+          max: 1400
+          step: 10
+          unit_of_measurement: "mV"

@@ -7,6 +7,20 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.7] - 2025-02-03
+
+### Added
+- Number entities for editable values (fan speed, frequency, core voltage)
+- Custom services (restart_miner, set_frequency, set_voltage)
+- Unit tests for API, sensors, and binary sensors
+- Service definitions with proper UI selectors in services.yaml
+- Test documentation in tests/README.md
+
+### Improved
+- Services are now properly registered and unloaded with the integration
+- API methods for setting frequency, voltage, and fan speed
+- Better code coverage with pytest test suite
+
 ## [1.0.1] - 2026-02-02
 
 ## [1.0.0] - 2026-02-02

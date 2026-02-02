@@ -39,7 +39,6 @@ SENSOR_TYPES: dict[str, tuple[str, str | None, list[str], SensorDeviceClass | No
     "bestSessionDiff": ("Best Session Difficulty", None, ["bestSessionDiff"], None, None, EntityCategory.DIAGNOSTIC),
     "poolDifficulty": ("Pool Difficulty", None, ["poolDifficulty"], None, None, EntityCategory.DIAGNOSTIC),
     "stratumDifficulty": ("Stratum Difficulty", None, ["stratumDifficulty"], None, None, EntityCategory.DIAGNOSTIC),
-    "isUsingFallbackStratum": ("Fallback Stratum Active", None, ["isUsingFallbackStratum"], None, None, EntityCategory.DIAGNOSTIC),
     "coreVoltage": ("Core Voltage Target", "mV", ["coreVoltage"], SensorDeviceClass.VOLTAGE, None, EntityCategory.CONFIG),
     "coreVoltageActual": ("Core Voltage Actual", "mV", ["coreVoltageActual", "coreVoltageActualMV"], SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, None),
     "frequency": ("Frequency", "MHz", ["frequency"], SensorDeviceClass.FREQUENCY, SensorStateClass.MEASUREMENT, None),
@@ -69,13 +68,8 @@ SENSOR_TYPES: dict[str, tuple[str, str | None, list[str], SensorDeviceClass | No
     "axeOSVersion": ("AxeOS Version", None, ["axeOSVersion"], None, None, EntityCategory.DIAGNOSTIC),
     "idfVersion": ("IDF Version", None, ["idfVersion"], None, None, EntityCategory.DIAGNOSTIC),
     "boardVersion": ("Board Version", None, ["boardVersion", "deviceModel"], None, None, EntityCategory.DIAGNOSTIC),
-    "overheat_mode": ("Overheat Mode", None, ["overheat_mode"], None, None, EntityCategory.DIAGNOSTIC),
-    "autofanspeed": ("Auto Fan Speed", None, ["autofanspeed"], None, None, EntityCategory.CONFIG),
     "fanspeed": ("Fan Speed (%)", "%", ["fanspeed"], None, SensorStateClass.MEASUREMENT, None),
     "fanrpm": ("Fan RPM", "RPM", ["fanrpm"], None, SensorStateClass.MEASUREMENT, None),
-    "invertfanpolarity": ("Invert Fan Polarity", None, ["invertfanpolarity"], None, None, EntityCategory.CONFIG),
-    "flipscreen": ("Flip Screen", None, ["flipscreen"], None, None, EntityCategory.CONFIG),
-    "invertscreen": ("Invert Screen", None, ["invertscreen"], None, None, EntityCategory.CONFIG),
     "temptarget": ("Temperature Target", "°C", ["temptarget"], SensorDeviceClass.TEMPERATURE, None, EntityCategory.CONFIG),
     "statsFrequency": ("Stats Frequency", "s", ["statsFrequency"], SensorDeviceClass.DURATION, None, EntityCategory.CONFIG),
     "sharesRejectedReasons": ("Rejected Shares Reasons", None, ["sharesRejectedReasons"], None, None, EntityCategory.DIAGNOSTIC),
@@ -147,10 +141,25 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         self.data_keys = data_keys
         self.sensor_key = sensor_key or (unique_id.split("_")[-1] if "_" in unique_id else unique_id)
         self._state = None
+        
+        # Set suggested display precision for specific sensors
+        if sensor_key in ["hashRate", "expectedHashrate"]:
+            self._attr_suggested_display_precision = 0
+        elif sensor_key in ["power", "voltage", "current", "coreVoltageActual"]:
+            self._attr_suggested_display_precision = 2
+        elif sensor_key in ["temp", "vrTemp", "temptarget"]:
+            self._attr_suggested_display_precision = 1
+        elif sensor_key == "frequency":
+            self._attr_suggested_display_precision = 0
 
     @property
     def native_value(self):
         return self._state
+    
+    @property
+    def available(self) -> bool:
+        """Return if entity is available."""
+        return self.coordinator.last_update_success and self._state is not None
 
     def _get_value_from_data(self) -> any:
         return get_value(self.coordinator.data, self.data_keys)

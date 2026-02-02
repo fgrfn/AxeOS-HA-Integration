@@ -63,6 +63,11 @@ class AxeOSRestartButton(ButtonEntity):
             _LOGGER.info("Restart successfully sent to %s", self.host_id)
         else:
             _LOGGER.error("Restart failed for %s", self.host_id)
+    
+    @property
+    def available(self) -> bool:
+        """Return if entity is available."""
+        return bool(self.api.system_info)
 
     @property
     def device_info(self):
