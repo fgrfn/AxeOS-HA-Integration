@@ -34,7 +34,35 @@ jobs:
             VERSION=$(jq -r '.version' custom_components/axeos_ha_integration/manifest.json)
           fi
           echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "Version: $VERSION"
+          echo "Current version: $VERSION"
+          
+          # Get latest tag version
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          LATEST_VERSION=${LATEST_TAG#v}
+          echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_OUTPUT
+          echo "Latest version: $LATEST_VERSION"
+
+      - name: Compare versions
+        id: check_version
+        run: |
+          CURRENT="${{ steps.version.outputs.VERSION }}"
+          LATEST="${{ steps.version.outputs.LATEST_VERSION }}"
+          
+          if [ "$CURRENT" == "$LATEST" ]; then
+            echo "❌ Version $CURRENT already exists. Please increment version in manifest.json"
+            echo "should_release=false" >> $GITHUB_OUTPUT
+            exit 0
+          fi
+          
+          # Simple version comparison (works for semantic versioning)
+          if [ "$CURRENT" \< "$LATEST" ] && [ "$CURRENT" != "$LATEST" ]; then
+            echo "❌ New version $CURRENT is lower than latest version $LATEST"
+            echo "should_release=false" >> $GITHUB_OUTPUT
+            exit 1
+          fi
+          
+          echo "✅ Version bump detected: $LATEST → $CURRENT"
+          echo "should_release=true" >> $GITHUB_OUTPUT
 
       - name: Check if tag exists
         id: check_tag
@@ -60,7 +88,7 @@ jobs:
           git push origin main
 
       - name: Create Tag
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_version.outputs.should_release == 'true' && steps.check_tag.outputs.exists == 'false'
         run: |
           VERSION="${{ steps.version.outputs.VERSION }}"
           git config user.name "github-actions[bot]"
@@ -69,7 +97,7 @@ jobs:
           git push origin "v$VERSION"
 
       - name: Create GitHub Release
-        if: steps.check_tag.outputs.exists == 'false'
+        if: steps.check_version.outputs.should_release == 'true' && steps.check_tag.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.VERSION }}
