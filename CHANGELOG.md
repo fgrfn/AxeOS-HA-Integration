@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.0.0] - 2026-02-02
+
 ### Added
 - Hide temperature sensors option in configuration
 - Update listener for options changes (scan interval, logging level, hide sensors)

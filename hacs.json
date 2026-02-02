@@ -6,7 +6,7 @@
   "domains": ["axeos_ha_integration"],
   "iot_class": "local_polling",
   "filename": "axeos_ha_integration",
-  "version": "1.0.4",
+  "version": "1.0.0",
   "documentation": "https://github.com/fgrfn/AxeOS-HA-Integration",
   "homeassistant": "2022.3.0",
   "render_readme": true,

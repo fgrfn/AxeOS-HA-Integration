@@ -1,7 +1,7 @@
 {
   "domain": "axeos_ha_integration",
   "name": "AxeOS-HA-Integration",
-  "version": "1.0.4",
+  "version": "1.0.0",
   "documentation": "https://github.com/fgrfn/AxeOS-HA-Integration",
   "requirements": [],
   "dependencies": [],
