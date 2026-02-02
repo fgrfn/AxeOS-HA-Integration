@@ -51,7 +51,7 @@ class AxeOSRestartButton(ButtonEntity):
         self.host_id = host_id
         self.api = api
 
-        self._attr_name = f"{miner_name} Restart"
+        self._attr_name = "Restart"
         self._attr_icon = "mdi:restart"
         self._attr_unique_id = f"{host_id}_restart_button"
 
@@ -72,7 +72,6 @@ class AxeOSRestartButton(ButtonEntity):
         sw_version = info.get("version", "")
         return {
             "identifiers": {(DOMAIN, self.entry_id)},
-            "name": self.miner_name,
             "manufacturer": "BitAxe",
             "model": model,
             "sw_version": sw_version,

@@ -89,17 +89,16 @@ async def async_setup_entry(
     hide_temp_sensors = entry.options.get("hide_temperature_sensors", False)
 
     entities: list[SensorEntity] = []
-    miner_name = coordinator.data.get("hostname", "BitAxe")
     for key, (suffix, unit, path) in SENSOR_TYPES.items():
         # Skip temperature sensors if option is enabled
         if hide_temp_sensors and key in ["temp", "vrTemp", "temptarget"]:
             continue
             
-        name = f"{miner_name} {suffix}"
-        unique_id = f"{miner_name.lower()}_{key}"
+        name = suffix
+        unique_id = f"{host_id}_{key}"
         entities.append(
             AxeOSHASensor(
-                coordinator, entry.entry_id, name, unique_id, unit, path, miner_name, key
+                coordinator, entry.entry_id, name, unique_id, unit, path, key
             )
         )
 
@@ -119,7 +118,6 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         unique_id: str,
         unit: str | None,
         data_keys: list[str],
-        host_id: str,
         sensor_key: str = None,
     ) -> None:
         super().__init__(coordinator)
@@ -128,7 +126,6 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         self._attr_unique_id = unique_id
         self._attr_native_unit_of_measurement = unit
         self.data_keys = data_keys
-        self.host_id = host_id
         self.sensor_key = sensor_key or (unique_id.split("_")[-1] if "_" in unique_id else unique_id)
         self._state = None
 
@@ -192,33 +189,7 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
     def device_info(self):
         return {
             "identifiers": {(DOMAIN, self.entry_id)},
-            "name": self.coordinator.data.get("hostname", self.host_id),
             "manufacturer": "BitAxe",
             "model": self.coordinator.data.get("boardVersion", "BitAxe Miner"),
             "sw_version": self.coordinator.data.get("version", ""),
         }
-
-
-class AxeOSConnectionStatusSensor(CoordinatorEntity, SensorEntity):
-    """Sensor to show if the miner is online."""
-
-    _attr_has_entity_name = True
-    entity_registry_enabled_default = True
-
-    def __init__(self, coordinator, entry_id: str, host_id: str):
-        super().__init__(coordinator)
-        self.entry_id = entry_id
-        self.host_id = host_id
-        self._attr_name = f"{host_id} Connection Status"
-        self._attr_unique_id = f"{host_id}_connection_status"
-        self._attr_icon = "mdi:lan-connect"
-        self._state = None
-
-    @property
-    def native_value(self):
-        return "online" if not self.coordinator.data.get("last_error") else "offline"
-
-    async def async_added_to_hass(self) -> None:
-        await super().async_added_to_hass()
-        self._state = self.native_value
-        self.async_write_ha_state()
