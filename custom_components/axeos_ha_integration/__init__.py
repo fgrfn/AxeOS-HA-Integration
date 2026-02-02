@@ -51,7 +51,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
 
         return system_info
 
-    scan_interval = entry.data.get("scan_interval", DEFAULT_SCAN_INTERVAL)
+    scan_interval = entry.options.get("scan_interval", entry.data.get("scan_interval", DEFAULT_SCAN_INTERVAL))
     coordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,
@@ -99,6 +99,3 @@ async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     if unload_ok:
         hass.data[DOMAIN].pop(entry.entry_id)
     return unload_ok
-
-async def async_setup_options_flow(hass, entry):
-    return AxeOSOptionsFlowHandler(entry)

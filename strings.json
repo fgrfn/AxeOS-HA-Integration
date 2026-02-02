@@ -21,8 +21,11 @@
     "step": {
       "init": {
         "data": {
-          "scan_interval": "Scan interval (seconds)"
-        }
+          "scan_interval": "Scan interval (seconds)",
+          "logging_level": "Logging level",
+          "hide_temperature_sensors": "Hide temperature sensors"
+        },
+        "description": "Configure integration options."
       }
     }
   }

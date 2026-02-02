@@ -77,18 +77,3 @@ class AxeOSRestartButton(ButtonEntity):
             "model": model,
             "sw_version": sw_version,
         }
-
-
-# Example for AxeOSAPI
-import aiohttp
-
-class AxeOSAPI:
-    def __init__(self, host: str):
-        self.host = host
-        self.system_info: dict[str, any] = {}
-
-    async def restart_system(self) -> bool:
-        url = f"http://{self.host}/api/system/restart"
-        async with aiohttp.ClientSession() as session:
-            async with session.post(url) as resp:
-                return resp.status == 200
