@@ -56,12 +56,21 @@ Key features include:
 
 ### HACS (Recommended)
 
+This integration is designed to be fully HACS-compatible:
+
 1. Add this repository to HACS as a **Custom Repository**:
    - Go to **HACS → Settings → Custom Repositories**
    - Enter: `https://github.com/fgrfn/AxeOS-HA-Integration`
    - Select **Integration** and click **Add**
 2. Go to **HACS → Integrations**, search for **AxeOS-HA-Integration**, and click **Install**
 3. Restart Home Assistant
+
+The integration follows all HACS guidelines:
+- Proper repository structure with `custom_components` directory
+- Valid `hacs.json` configuration
+- Comprehensive documentation
+- Automated releases with proper versioning
+- MIT License
 
 ### Manual Installation
 
@@ -155,6 +164,33 @@ cards:
 ```
 
 ---
+
+## Development & Contributing
+
+This project follows semantic versioning and uses automated release workflows.
+
+### Release Process
+
+Releases are automatically created when a version tag is pushed:
+
+```bash
+git tag -a v1.0.5 -m "Release version 1.0.5"
+git push origin v1.0.5
+```
+
+The GitHub Actions workflow will:
+- Update version numbers in `manifest.json` and `hacs.json`
+- Extract changelog from `CHANGELOG.md`
+- Create a GitHub release with release notes
+- Make the release available in HACS
+
+### Code Quality
+
+All pull requests are automatically validated with:
+- Python syntax checking
+- JSON validation for configuration files
+- Manifest and HACS configuration validation
+- Translation file validation
 
 ## Troubleshooting
 
