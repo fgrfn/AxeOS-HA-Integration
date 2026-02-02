@@ -171,12 +171,18 @@ This project follows semantic versioning and uses automated release workflows.
 
 ### Release Process
 
-Releases are automatically created when a version tag is pushed:
+This repository offers multiple ways to create releases:
 
-```bash
-git tag -a v1.0.5 -m "Release version 1.0.5"
-git push origin v1.0.5
-```
+1. **Automated Draft Releases** (Recommended): PRs merged to main automatically update a draft release
+2. **Manual Release Creation**: Use the GitHub Actions "Create Release" workflow for one-click releases
+3. **Tag-based Releases** (Legacy): Push a version tag manually
+
+For detailed instructions, see [RELEASE_GUIDE.md](RELEASE_GUIDE.md).
+
+**Quick manual release:**
+1. Go to Actions → "Create Release"
+2. Enter version number (e.g., 1.0.5)
+3. Run workflow - everything else is automated!
 
 The GitHub Actions workflow will:
 - Update version numbers in `manifest.json` and `hacs.json`
