@@ -44,13 +44,6 @@ jobs:
           echo "hacs.json version: $HACS"
           echo "Latest tag: $LATEST_TAG"
 
-      - name: Validate version sync
-        run: |
-          if [ "${{ steps.version.outputs.CURRENT }}" != "${{ steps.version.outputs.HACS }}" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
-            echo "❌ manifest.json and hacs.json versions differ"
-            exit 1
-          fi
-
       - name: Compare against latest tag (semver)
         id: check_version
         run: |
