@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
 
       - name: Verify manifest/hacs version match
         run: |
@@ -27,4 +26,5 @@ jobs:
             exit 1
           fi
 
+          echo "✅ Versions are in sync"
           echo "✅ Versions are in sync"

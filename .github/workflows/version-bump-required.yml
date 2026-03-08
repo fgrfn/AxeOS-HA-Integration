@@ -12,7 +12,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -50,4 +49,5 @@ jobs:
             exit 1
           fi
 
+          echo "✅ Manifest version bump detected"
           echo "✅ Manifest version bump detected"
