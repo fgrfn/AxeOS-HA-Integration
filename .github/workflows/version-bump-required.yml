@@ -1,0 +1,53 @@
+name: Require Version Bump On Integration Changes
+
+on:
+  pull_request:
+    paths:
+      - "custom_components/axeos_ha_integration/**"
+      - "hacs.json"
+      - ".github/workflows/**"
+
+jobs:
+  require-version-bump:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Check if integration files changed
+        id: changed
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          CHANGED=$(git diff --name-only "$BASE_SHA" "$HEAD_SHA" -- custom_components/axeos_ha_integration)
+
+          if [ -z "$CHANGED" ]; then
+            echo "integration_changed=false" >> "$GITHUB_OUTPUT"
+            echo "No integration file changes detected."
+          else
+            echo "integration_changed=true" >> "$GITHUB_OUTPUT"
+            echo "Integration files changed:"
+            echo "$CHANGED"
+          fi
+
+      - name: Require manifest version bump when integration changed
+        if: steps.changed.outputs.integration_changed == 'true'
+        run: |
+          BASE_SHA="${{ github.event.pull_request.base.sha }}"
+          HEAD_SHA="${{ github.event.pull_request.head.sha }}"
+
+          BASE_VER=$(git show "$BASE_SHA:custom_components/axeos_ha_integration/manifest.json" | jq -r '.version')
+          HEAD_VER=$(git show "$HEAD_SHA:custom_components/axeos_ha_integration/manifest.json" | jq -r '.version')
+
+          echo "Base manifest version: $BASE_VER"
+          echo "Head manifest version: $HEAD_VER"
+
+          if [ "$BASE_VER" = "$HEAD_VER" ]; then
+            echo "❌ Integration code changed but manifest version was not bumped"
+            exit 1
+          fi
+
+          echo "✅ Manifest version bump detected"
