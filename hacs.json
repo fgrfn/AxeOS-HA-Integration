@@ -1,5 +1,5 @@
 {
-  "name": "AxeOS-HA-Integration",
+  "name": "AxeOS HA Integration",
   "content_in_root": false,
   "country": "DE",
   "description": "Monitor and control BitAxe & NerdAxe Bitcoin miners. 80+ sensors, custom services, number entities for fan/frequency/voltage control.",
