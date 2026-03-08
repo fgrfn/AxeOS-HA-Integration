@@ -6,7 +6,8 @@
         "title": "Add AxeOS Miner",
         "data": {
           "host": "Miner IP or Hostname",
-          "name": "Name (optional)"
+          "name": "Name (optional)",
+          "scan_interval": "Scan interval (seconds)"
         },
         "description": "Please enter the IP address or hostname of your AxeOS Miner."
       }

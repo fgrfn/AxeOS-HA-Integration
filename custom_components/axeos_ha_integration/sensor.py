@@ -2,7 +2,9 @@
 """Sensor platform for AxeOS-HA-Integration: only system info fields."""
 
 from __future__ import annotations
+
 import logging
+from typing import Any
 
 from homeassistant.components.sensor import (
     SensorEntity,
@@ -15,7 +17,7 @@ from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 from homeassistant.helpers.entity import EntityCategory
 
-from .const import DOMAIN, DEFAULT_SCAN_INTERVAL
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -107,7 +109,7 @@ SENSOR_TYPES: dict[str, tuple[str, str | None, list[str], SensorDeviceClass | No
     "stratum_poolDifficulty": ("Stratum Pool Difficulty", None, ["stratum", "poolDifficulty"], None, None, EntityCategory.DIAGNOSTIC),
 }
 
-def get_value(data: dict, keys: list[str]) -> any:
+def get_value(data: dict, keys: list[str]) -> Any:
     """Get value from data dict, supporting nested keys.
     
     keys can be either:
@@ -177,7 +179,7 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         unique_id: str,
         unit: str | None,
         data_keys: list[str],
-        sensor_key: str = None,
+        sensor_key: str | None = None,
         device_class: SensorDeviceClass | None = None,
         state_class: SensorStateClass | None = None,
         entity_category: EntityCategory | None = None,
@@ -213,7 +215,7 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         """Return if entity is available."""
         return self.coordinator.last_update_success and self._state is not None
 
-    def _get_value_from_data(self) -> any:
+    def _get_value_from_data(self) -> Any:
         return get_value(self.coordinator.data, self.data_keys)
 
     def _handle_coordinator_update(self) -> None:
@@ -226,7 +228,7 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
 
     @property
     def extra_state_attributes(self):
-        attrs: dict[str, any] = {}
+        attrs: dict[str, Any] = {}
         if self.sensor_key == "sharesRejectedReasons":
             val = self.coordinator.data.get(self.data_keys[0])
             if isinstance(val, list):

@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from typing import Any
+
 import voluptuous as vol
 
 from homeassistant import config_entries
@@ -37,7 +39,7 @@ class AxeOSHaIntegrationConfigFlow(
         return AxeOSOptionsFlowHandler(config_entry)
 
     async def async_step_user(
-        self, user_input: dict[str, any] | None = None
+        self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
         """First step: ask for host, optional name, and scan interval."""
         errors: dict[str, str] = {}

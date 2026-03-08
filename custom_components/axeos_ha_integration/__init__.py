@@ -83,7 +83,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     device_registry = dr.async_get(hass)
     device_registry.async_get_or_create(
         config_entry_id=entry.entry_id,
-        identifiers={(DOMAIN, entry.entry_id)},  # <--- Fix hier!
+        identifiers={(DOMAIN, entry.entry_id)},
         name=name,
         manufacturer="BitAxe",
         model=coordinator.data.get("boardVersion", "BitAxe Miner"),
