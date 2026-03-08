@@ -19,6 +19,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout
+        uses: actions/checkout@v4
         with:
           fetch-depth: 0
 
@@ -117,10 +118,10 @@ jobs:
 
       - name: Create GitHub Release
         if: steps.check_version.outputs.should_release == 'true' && steps.check_tag.outputs.exists == 'false'
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: v${{ steps.version.outputs.CURRENT }}
           name: v${{ steps.version.outputs.CURRENT }}
           generate_release_notes: true
           draft: false
-          prerelease: false
           prerelease: false
