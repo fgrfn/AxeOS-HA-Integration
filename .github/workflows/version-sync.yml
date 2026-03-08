@@ -1,0 +1,30 @@
+name: Version Sync Check
+
+on:
+  pull_request:
+  push:
+    branches:
+      - main
+      - dev
+
+jobs:
+  check-version-sync:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Verify manifest/hacs version match
+        run: |
+          MANIFEST_VERSION=$(jq -r '.version' custom_components/axeos_ha_integration/manifest.json)
+          HACS_VERSION=$(jq -r '.version' hacs.json)
+
+          echo "manifest.json: $MANIFEST_VERSION"
+          echo "hacs.json:     $HACS_VERSION"
+
+          if [ "$MANIFEST_VERSION" != "$HACS_VERSION" ]; then
+            echo "❌ Version mismatch: manifest.json ($MANIFEST_VERSION) != hacs.json ($HACS_VERSION)"
+            exit 1
+          fi
+
+          echo "✅ Versions are in sync"

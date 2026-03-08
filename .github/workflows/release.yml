@@ -4,12 +4,10 @@ on:
   push:
     branches:
       - main
-    paths:
-      - 'custom_components/axeos_ha_integration/manifest.json'
   workflow_dispatch:
     inputs:
       version:
-        description: 'Version (z.B. 1.0.5)'
+        description: "Version (e.g. 1.0.10)"
         required: true
         type: string
 
@@ -23,74 +21,103 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 2
+          fetch-depth: 0
 
-      - name: Get version from manifest
+      - name: Determine versions
         id: version
         run: |
-          if [ "${{ github.event_name }}" == "workflow_dispatch" ]; then
-            VERSION="${{ github.event.inputs.version }}"
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            CURRENT="${{ github.event.inputs.version }}"
           else
-            VERSION=$(jq -r '.version' custom_components/axeos_ha_integration/manifest.json)
+            CURRENT=$(jq -r '.version' custom_components/axeos_ha_integration/manifest.json)
           fi
-          echo "VERSION=$VERSION" >> $GITHUB_OUTPUT
-          echo "Current version: $VERSION"
-          
-          # Get latest tag version
-          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
-          LATEST_VERSION=${LATEST_TAG#v}
-          echo "LATEST_VERSION=$LATEST_VERSION" >> $GITHUB_OUTPUT
-          echo "Latest version: $LATEST_VERSION"
 
-      - name: Compare versions
-        id: check_version
+          HACS=$(jq -r '.version' hacs.json)
+          LATEST_TAG=$(git describe --tags --abbrev=0 2>/dev/null || echo "v0.0.0")
+          LATEST="${LATEST_TAG#v}"
+
+          echo "CURRENT=$CURRENT" >> "$GITHUB_OUTPUT"
+          echo "HACS=$HACS" >> "$GITHUB_OUTPUT"
+          echo "LATEST=$LATEST" >> "$GITHUB_OUTPUT"
+
+          echo "Current version: $CURRENT"
+          echo "hacs.json version: $HACS"
+          echo "Latest tag: $LATEST_TAG"
+
+      - name: Validate version sync
         run: |
-          CURRENT="${{ steps.version.outputs.VERSION }}"
-          LATEST="${{ steps.version.outputs.LATEST_VERSION }}"
-          
-          if [ "$CURRENT" == "$LATEST" ]; then
-            echo "❌ Version $CURRENT already exists. Please increment version in manifest.json"
-            echo "should_release=false" >> $GITHUB_OUTPUT
-            exit 0
-          fi
-          
-          # Simple version comparison (works for semantic versioning)
-          if [ "$CURRENT" \< "$LATEST" ] && [ "$CURRENT" != "$LATEST" ]; then
-            echo "❌ New version $CURRENT is lower than latest version $LATEST"
-            echo "should_release=false" >> $GITHUB_OUTPUT
+          if [ "${{ steps.version.outputs.CURRENT }}" != "${{ steps.version.outputs.HACS }}" ] && [ "${{ github.event_name }}" != "workflow_dispatch" ]; then
+            echo "❌ manifest.json and hacs.json versions differ"
             exit 1
           fi
-          
-          echo "✅ Version bump detected: $LATEST → $CURRENT"
-          echo "should_release=true" >> $GITHUB_OUTPUT
 
-      - name: Check if tag exists
-        id: check_tag
+      - name: Compare against latest tag (semver)
+        id: check_version
         run: |
-          if git rev-parse "v${{ steps.version.outputs.VERSION }}" >/dev/null 2>&1; then
-            echo "exists=true" >> $GITHUB_OUTPUT
-          else
-            echo "exists=false" >> $GITHUB_OUTPUT
-          fi
+          python3 - <<'PY'
+          import os, sys
 
-      - name: Update version (manual only)
+          current = os.environ['CURRENT']
+          latest = os.environ['LATEST']
+
+          def parse(v: str):
+              parts = v.strip().split('.')
+              if len(parts) != 3 or any(not p.isdigit() for p in parts):
+                  raise ValueError(f"Invalid semver version: {v}")
+              return tuple(int(p) for p in parts)
+
+          try:
+              c = parse(current)
+              l = parse(latest)
+          except Exception as e:
+              print(f"❌ {e}")
+              sys.exit(1)
+
+          out = os.environ['GITHUB_OUTPUT']
+          if c == l:
+              print(f"ℹ️ Version {current} already released")
+              with open(out, 'a') as f:
+                  f.write('should_release=false\n')
+          elif c < l:
+              print(f"❌ New version {current} is lower than latest {latest}")
+              sys.exit(1)
+          else:
+              print(f"✅ Version bump detected: {latest} -> {current}")
+              with open(out, 'a') as f:
+                  f.write('should_release=true\n')
+          PY
+        env:
+          CURRENT: ${{ steps.version.outputs.CURRENT }}
+          LATEST: ${{ steps.version.outputs.LATEST }}
+
+      - name: Update versions (manual only)
         if: github.event_name == 'workflow_dispatch'
         run: |
-          VERSION="${{ steps.version.outputs.VERSION }}"
-          sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" custom_components/axeos_ha_integration/manifest.json
-          if [ -f hacs.json ]; then
-            sed -i "s/\"version\": \".*\"/\"version\": \"$VERSION\"/" hacs.json
-          fi
+          VERSION="${{ steps.version.outputs.CURRENT }}"
+          jq --arg v "$VERSION" '.version = $v' custom_components/axeos_ha_integration/manifest.json > /tmp/manifest.json
+          mv /tmp/manifest.json custom_components/axeos_ha_integration/manifest.json
+          jq --arg v "$VERSION" '.version = $v' hacs.json > /tmp/hacs.json
+          mv /tmp/hacs.json hacs.json
+
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
-          git add .
+          git add custom_components/axeos_ha_integration/manifest.json hacs.json
           git diff --staged --quiet || git commit -m "chore: bump version to $VERSION"
           git push origin main
 
-      - name: Create Tag
+      - name: Check if tag already exists
+        id: check_tag
+        run: |
+          if git rev-parse "v${{ steps.version.outputs.CURRENT }}" >/dev/null 2>&1; then
+            echo "exists=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "exists=false" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Create tag
         if: steps.check_version.outputs.should_release == 'true' && steps.check_tag.outputs.exists == 'false'
         run: |
-          VERSION="${{ steps.version.outputs.VERSION }}"
+          VERSION="${{ steps.version.outputs.CURRENT }}"
           git config user.name "github-actions[bot]"
           git config user.email "github-actions[bot]@users.noreply.github.com"
           git tag "v$VERSION"
@@ -100,8 +127,8 @@ jobs:
         if: steps.check_version.outputs.should_release == 'true' && steps.check_tag.outputs.exists == 'false'
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: v${{ steps.version.outputs.VERSION }}
-          name: v${{ steps.version.outputs.VERSION }}
+          tag_name: v${{ steps.version.outputs.CURRENT }}
+          name: v${{ steps.version.outputs.CURRENT }}
           generate_release_notes: true
           draft: false
           prerelease: false
