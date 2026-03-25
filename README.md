@@ -116,7 +116,7 @@ After setup, click **Configure** on the integration to adjust:
 - Frequency (MHz)
 
 #### Hashrate Metrics
-- Current Hashrate (H/s)
+- Current Hashrate (GH/s)
 - Hashrate 1 minute average
 - Hashrate 10 minutes average
 - Hashrate 1 hour average
@@ -223,7 +223,7 @@ automation:
       - service: notify.mobile_app
         data:
           title: "⚠️ Miner Alert"
-          message: "BitAxe Gamma hashrate dropped to {{ states('sensor.bitaxe_gamma_current_hashrate') }} H/s"
+          message: "BitAxe Gamma hashrate dropped to {{ states('sensor.bitaxe_gamma_current_hashrate') }} GH/s"
 ```
 
 ### Adjust Fan Based on Temperature
