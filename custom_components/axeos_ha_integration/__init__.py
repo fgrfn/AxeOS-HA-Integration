@@ -95,7 +95,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     await async_setup_services(hass)
 
     # Reload entry when options change
-    entry.async_on_unload(entry.add_update_listener(entry.async_reload))
+    async def _async_update_listener(hass: HomeAssistant, entry: ConfigEntry) -> None:
+        await hass.config_entries.async_reload(entry.entry_id)
+
+    entry.async_on_unload(entry.add_update_listener(_async_update_listener))
 
     return True
 
