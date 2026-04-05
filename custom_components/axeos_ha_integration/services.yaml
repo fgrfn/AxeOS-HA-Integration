@@ -67,3 +67,29 @@ set_voltage:
           max: 1400
           step: 10
           unit_of_measurement: "mV"
+
+set_fanspeed:
+  name: Set Fan Speed
+  description: Set the fan speed (%)
+  target:
+    entity:
+      integration: axeos_ha_integration
+      domain: sensor
+  fields:
+    entity_id:
+      name: Entity
+      description: The miner entity
+      required: true
+      selector:
+        entity:
+          integration: axeos_ha_integration
+    fanspeed:
+      name: Fan Speed
+      description: Fan speed in percent (0-100)
+      required: true
+      selector:
+        number:
+          min: 0
+          max: 100
+          step: 1
+          unit_of_measurement: "%"

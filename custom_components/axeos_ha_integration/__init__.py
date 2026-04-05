@@ -16,7 +16,7 @@ def get_logger(level):
     logger.setLevel(getattr(logging, level.upper(), logging.INFO))
     return logger
 
-PLATFORMS = ["sensor", "button", "binary_sensor", "number"]
+PLATFORMS = ["sensor", "button", "binary_sensor", "number", "switch"]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Called when a config entry is created or loaded."""
@@ -29,7 +29,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     # Use shared aiohttp session from Home Assistant
     session = async_get_clientsession(hass)
     api = AxeOSAPI(session, host)
-    system_info = await api.get_system_info()
 
     hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {}
@@ -71,7 +70,6 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
         raise ConfigEntryNotReady(f"Initial update not successful: {host}")
 
     # Store coordinator and API client in hass.data for platforms
-    hass.data.setdefault(DOMAIN, {})
     hass.data[DOMAIN][entry.entry_id] = {
         "coordinator": coordinator,
         "api": api,
@@ -95,7 +93,10 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     
     # Setup services
     await async_setup_services(hass)
-    
+
+    # Reload entry when options change
+    entry.async_on_unload(entry.add_update_listener(entry.async_reload))
+
     return True
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:

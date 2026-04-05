@@ -18,6 +18,7 @@ _LOGGER = logging.getLogger(__name__)
 SERVICE_RESTART = "restart_miner"
 SERVICE_SET_FREQUENCY = "set_frequency"
 SERVICE_SET_VOLTAGE = "set_voltage"
+SERVICE_SET_FANSPEED = "set_fanspeed"
 
 SERVICE_RESTART_SCHEMA = vol.Schema(
     {
@@ -36,6 +37,13 @@ SERVICE_SET_VOLTAGE_SCHEMA = vol.Schema(
     {
         vol.Required("entity_id"): cv.entity_id,
         vol.Required("voltage"): vol.All(vol.Coerce(int), vol.Range(min=1000, max=1400)),
+    }
+)
+
+SERVICE_SET_FANSPEED_SCHEMA = vol.Schema(
+    {
+        vol.Required("entity_id"): cv.entity_id,
+        vol.Required("fanspeed"): vol.All(vol.Coerce(int), vol.Range(min=0, max=100)),
     }
 )
 
@@ -67,6 +75,8 @@ def _resolve_api_for_entity(hass: HomeAssistant, entity_id: str) -> tuple[str, A
 
 async def async_setup_services(hass: HomeAssistant) -> None:
     """Set up services for AxeOS integration."""
+    if hass.services.has_service(DOMAIN, SERVICE_RESTART):
+        return
 
     async def handle_restart(call: ServiceCall) -> None:
         """Handle the restart service call."""
@@ -114,6 +124,24 @@ async def async_setup_services(hass: HomeAssistant) -> None:
                 f"Setting voltage to {voltage} mV failed for '{entity_id}'"
             )
 
+    async def handle_set_fanspeed(call: ServiceCall) -> None:
+        """Handle the set_fanspeed service call."""
+        entity_id = call.data["entity_id"]
+        fanspeed = call.data["fanspeed"]
+        entry_id, api = _resolve_api_for_entity(hass, entity_id)
+
+        _LOGGER.info(
+            "Setting fanspeed=%s%% for %s (entry: %s)",
+            fanspeed,
+            entity_id,
+            entry_id,
+        )
+        ok = await api.set_fanspeed(fanspeed)
+        if not ok:
+            raise HomeAssistantError(
+                f"Setting fan speed to {fanspeed}% failed for '{entity_id}'"
+            )
+
     hass.services.async_register(
         DOMAIN,
         SERVICE_RESTART,
@@ -135,6 +163,13 @@ async def async_setup_services(hass: HomeAssistant) -> None:
         schema=SERVICE_SET_VOLTAGE_SCHEMA,
     )
 
+    hass.services.async_register(
+        DOMAIN,
+        SERVICE_SET_FANSPEED,
+        handle_set_fanspeed,
+        schema=SERVICE_SET_FANSPEED_SCHEMA,
+    )
+
     _LOGGER.info("AxeOS services registered")
 
 
@@ -143,4 +178,5 @@ async def async_unload_services(hass: HomeAssistant) -> None:
     hass.services.async_remove(DOMAIN, SERVICE_RESTART)
     hass.services.async_remove(DOMAIN, SERVICE_SET_FREQUENCY)
     hass.services.async_remove(DOMAIN, SERVICE_SET_VOLTAGE)
+    hass.services.async_remove(DOMAIN, SERVICE_SET_FANSPEED)
     _LOGGER.info("AxeOS services unloaded")

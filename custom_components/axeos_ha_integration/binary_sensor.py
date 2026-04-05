@@ -21,13 +21,8 @@ _LOGGER = logging.getLogger(__name__)
 BINARY_SENSOR_TYPES: dict[str, tuple[str, list[str], BinarySensorDeviceClass | None, EntityCategory | None]] = {
     "overheat_mode": ("Overheat Mode", ["overheat_mode"], BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
     "isUsingFallbackStratum": ("Using Fallback Stratum", ["isUsingFallbackStratum", "stratum.usingFallback"], BinarySensorDeviceClass.CONNECTIVITY, EntityCategory.DIAGNOSTIC),
-    "autofanspeed": ("Auto Fan Speed", ["autofanspeed"], None, None),
-    "invertfanpolarity": ("Invert Fan Polarity", ["invertfanpolarity"], None, None),
-    "flipscreen": ("Flip Screen", ["flipscreen"], None, None),
-    "invertscreen": ("Invert Screen", ["invertscreen"], None, None),
     # NerdAxe specific binary sensors
     "shutdown": ("Shutdown", ["shutdown"], BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
-    "autoscreenoff": ("Auto Screen Off", ["autoscreenoff"], None, None),
     "stratum_keep": ("Keep Stratum Connection", ["stratum_keep"], BinarySensorDeviceClass.CONNECTIVITY, EntityCategory.DIAGNOSTIC),
     "otp": ("One-Time Programming", ["otp"], None, EntityCategory.DIAGNOSTIC),
     "stratumEnonceSubscribe": ("Stratum Enonce Subscribe", ["stratumEnonceSubscribe"], None, EntityCategory.DIAGNOSTIC),
