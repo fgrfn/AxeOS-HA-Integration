@@ -7,7 +7,7 @@
 
 A comprehensive Home Assistant custom integration for monitoring and controlling **BitAxe** and **NerdAxe** Bitcoin miners.
 
-![AxeOS HA Integration logo](https://raw.githubusercontent.com/fgrfn/AxeOS-HA-Integration/main/brand/logo.png)
+<img src="https://raw.githubusercontent.com/fgrfn/AxeOS-HA-Integration/main/brand/logo.png" alt="AxeOS HA Integration logo" width="512">
 
 ---
 
