@@ -1,8 +1,8 @@
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers import device_registry as dr
 from datetime import timedelta
 import logging
@@ -16,7 +16,13 @@ def get_logger(level):
     logger.setLevel(getattr(logging, level.upper(), logging.INFO))
     return logger
 
-PLATFORMS = ["sensor", "button", "binary_sensor", "number", "switch"]
+PLATFORMS: list[Platform] = [
+    Platform.SENSOR,
+    Platform.BUTTON,
+    Platform.BINARY_SENSOR,
+    Platform.NUMBER,
+    Platform.SWITCH,
+]
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     """Called when a config entry is created or loaded."""
@@ -30,18 +36,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     session = async_get_clientsession(hass)
     api = AxeOSAPI(session, host)
 
-    hass.data.setdefault(DOMAIN, {})
-    hass.data[DOMAIN][entry.entry_id] = {}
+    entry_data = hass.data.setdefault(DOMAIN, {}).setdefault(entry.entry_id, {})
 
     async def async_update_data():
-        # Now entry_data exists!
         system_info = await api.get_system_info()
         if system_info is None:
             raise UpdateFailed(f"Cannot fetch system info from {host}")
 
         hr = system_info.get("hashRate")
         if hr is not None:
-            entry_data = hass.data[DOMAIN][entry.entry_id]
             history = entry_data.get("hashrate_history", [])
             history.append(hr)
             if len(history) > 100:
@@ -55,27 +58,24 @@ async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
     coordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,
+        config_entry=entry,
         name=f"{DOMAIN}_{host}",
         update_method=async_update_data,
         update_interval=timedelta(seconds=scan_interval),
     )
 
-    # Initial update to check connectivity
-    try:
-        await coordinator.async_refresh()
-    except Exception as err:
-        raise ConfigEntryNotReady(f"Initial update failed: {err}") from err
-
-    if not coordinator.last_update_success:
-        raise ConfigEntryNotReady(f"Initial update not successful: {host}")
+    # Initial update to check connectivity; raises ConfigEntryNotReady on failure
+    await coordinator.async_config_entry_first_refresh()
 
     # Store coordinator and API client in hass.data for platforms
-    hass.data[DOMAIN][entry.entry_id] = {
-        "coordinator": coordinator,
-        "api": api,
-        "host": host,
-        "name": name,
-    }
+    entry_data.update(
+        {
+            "coordinator": coordinator,
+            "api": api,
+            "host": host,
+            "name": name,
+        }
+    )
 
     # Register device in device registry
     device_registry = dr.async_get(hass)

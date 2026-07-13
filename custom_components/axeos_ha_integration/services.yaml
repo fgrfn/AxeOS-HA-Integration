@@ -3,10 +3,6 @@
 restart_miner:
   name: Restart Miner
   description: Restart the BitAxe miner
-  target:
-    entity:
-      integration: axeos_ha_integration
-      domain: sensor
   fields:
     entity_id:
       name: Entity
@@ -19,10 +15,6 @@ restart_miner:
 set_frequency:
   name: Set Frequency
   description: Set the mining frequency (MHz)
-  target:
-    entity:
-      integration: axeos_ha_integration
-      domain: sensor
   fields:
     entity_id:
       name: Entity
@@ -45,10 +37,6 @@ set_frequency:
 set_voltage:
   name: Set Voltage
   description: Set the core voltage (mV)
-  target:
-    entity:
-      integration: axeos_ha_integration
-      domain: sensor
   fields:
     entity_id:
       name: Entity
@@ -71,10 +59,6 @@ set_voltage:
 set_fanspeed:
   name: Set Fan Speed
   description: Set the fan speed (%)
-  target:
-    entity:
-      integration: axeos_ha_integration
-      domain: sensor
   fields:
     entity_id:
       name: Entity

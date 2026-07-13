@@ -7,6 +7,27 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.11.0] - 2026-07-13
+
+### Fixed
+- Options flow crashed on Home Assistant 2025.12+: removed the deprecated explicit
+  `self.config_entry` assignment in `AxeOSOptionsFlowHandler` (support removed by HA core in 2025.12)
+- `DataUpdateCoordinator` is now created with an explicit `config_entry` (implicit
+  access was deprecated and stopped working in HA 2025.11)
+- Hashrate history no longer loses the first sample during setup and no longer risks
+  a `KeyError` when an update runs while the entry is being unloaded
+- Service definitions no longer offer a `target:` selector; the services expect a
+  single `entity_id` field, and target selection passed an incompatible list
+- Test suite updated to match the actual sensor/binary sensor implementations
+  (previously referenced a non-existent `AxeOSSensor` class)
+
+### Changed
+- Minimum supported Home Assistant version is now 2024.11
+- Initial refresh uses `async_config_entry_first_refresh()`
+- `FlowResult` replaced with `ConfigFlowResult`, `EntityCategory` imported from
+  `homeassistant.const`, platform list uses the `Platform` enum
+- Added GitHub Actions workflow that runs the pytest suite on pushes and pull requests
+
 ## [1.0.9] - 2025-02-03
 
 ### Fixed

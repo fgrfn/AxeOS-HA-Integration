@@ -7,7 +7,7 @@
 
 A comprehensive Home Assistant custom integration for monitoring and controlling **BitAxe** and **NerdAxe** Bitcoin miners.
 
-![AxeOS HA Integration logo](https://raw.githubusercontent.com/fgrfn/AxeOS-HA-Integration/main/brand/logo.png)
+<img src="https://raw.githubusercontent.com/fgrfn/AxeOS-HA-Integration/main/brand/logo.png" alt="AxeOS HA Integration logo" width="512">
 
 ---
 
@@ -55,6 +55,8 @@ A comprehensive Home Assistant custom integration for monitoring and controlling
 ---
 
 ## 📦 Installation
+
+> **Requirement:** Home Assistant 2024.11 or newer.
 
 ### HACS (Recommended)
 
@@ -322,13 +324,11 @@ refresh_interval: 0
 
 See [CHANGELOG.md](CHANGELOG.md) for version history and changes.
 
-### Latest Version (1.0.8)
-- ✨ Full NerdAxe device support with 25+ additional sensors
-- ✨ Extended hashrate metrics (1m, 10m, 1h, 1d)
-- ✨ PID controller monitoring
-- ✨ Stratum pool details
-- ✨ Hardware diagnostics
-- 🔧 Improved nested data path support
+### Latest Version (1.11.0)
+- 🔧 Compatibility with current Home Assistant releases (options flow fix, coordinator config entry)
+- 🔧 Requires Home Assistant 2024.11 or newer
+- 🔧 Fixed hashrate history losing its first sample
+- 🔧 Fixed service definitions (removed incompatible target selector)
 
 ---
 
