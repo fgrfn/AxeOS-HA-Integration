@@ -7,8 +7,8 @@ from typing import Any
 import voluptuous as vol
 
 from homeassistant import config_entries
-from homeassistant.core import HomeAssistant
-from homeassistant.data_entry_flow import FlowResult
+from homeassistant.config_entries import ConfigFlowResult
+from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant import exceptions
 
@@ -34,13 +34,14 @@ class AxeOSHaIntegrationConfigFlow(
     VERSION = 1
 
     @staticmethod
+    @callback
     def async_get_options_flow(config_entry):
         """Get the options flow for this handler."""
-        return AxeOSOptionsFlowHandler(config_entry)
+        return AxeOSOptionsFlowHandler()
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
-    ) -> FlowResult:
+    ) -> ConfigFlowResult:
         """First step: ask for host, optional name, and scan interval."""
         errors: dict[str, str] = {}
 
@@ -83,9 +84,6 @@ class AxeOSHaIntegrationConfigFlow(
 
 class AxeOSOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle option flow, e.g. scan_interval, logging."""
-
-    def __init__(self, config_entry):
-        self.config_entry = config_entry
 
     async def async_step_init(self, user_input=None):
         """Manage the options."""
