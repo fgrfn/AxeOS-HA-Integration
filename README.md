@@ -1,56 +1,29 @@
+<div align="center">
+
+<img src="https://raw.githubusercontent.com/fgrfn/AxeOS-HA-Integration/main/brand/logo.png" alt="AxeOS HA Integration logo" width="200">
+
 # AxeOS Home Assistant Integration
+
+**Monitor and control your BitAxe & NerdAxe Bitcoin miners — right from Home Assistant.**
 
 [![GitHub Release](https://img.shields.io/github/v/release/fgrfn/AxeOS-HA-Integration?style=for-the-badge)](https://github.com/fgrfn/AxeOS-HA-Integration/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 [![HACS](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
 [![Code Quality](https://img.shields.io/badge/code%20quality-A-success?style=for-the-badge)](https://github.com/fgrfn/AxeOS-HA-Integration)
 
-A comprehensive Home Assistant custom integration for monitoring and controlling **BitAxe** and **NerdAxe** Bitcoin miners.
-
-<img src="https://raw.githubusercontent.com/fgrfn/AxeOS-HA-Integration/main/brand/logo.png" alt="AxeOS HA Integration logo" width="512">
+</div>
 
 ---
 
-## 🌟 Features
+## 🌟 Highlights
 
-### 📊 **Comprehensive Monitoring**
-- **80+ Sensors** covering all aspects of your miner
-- Real-time power consumption, voltage, current, and temperature
-- Multiple hashrate metrics (instant, 1m, 10m, 1h, 1d averages)
-- Mining statistics (shares, difficulty, blocks found)
-- Network information (IP, WiFi, signal strength)
-- Hardware diagnostics (heap memory, uptime, reset reasons)
-
-### 🎛️ **Full Control**
-- **Number Entities** for adjusting settings on the fly:
-  - Fan speed (0-100%)
-  - Frequency (200-600 MHz)
-  - Core voltage (1000-1400 mV)
-- **Custom Services** for automation:
-  - `restart_miner` - Reboot your miner
-  - `set_frequency` - Change mining frequency
-  - `set_voltage` - Adjust core voltage
-- **Button Entity** for quick restart
-
-### 🔧 **Advanced Features**
-- **Binary Sensors** for boolean states (overheat mode, fallback stratum, fan settings)
-- **Entity Categories** for organized UI (diagnostic, config)
-- **Device Classes** for proper sensor types (power, voltage, temperature, etc.)
-- **State Classes** for long-term statistics (measurement, total increasing)
-- **Display Precision** for clean value presentation
-- **Availability Tracking** - Entities show as unavailable when miner is offline
-
-### 🚀 **Device Support**
-- ✅ **BitAxe** - All models with standard AxeOS firmware
-- ✅ **NerdAxe** - ESP-Miner-NerdAxe devices with extended API
-- Automatic detection of device capabilities
-- Support for both flat and nested API structures
-
-### 🌐 **Multi-Miner & Internationalization**
-- Add unlimited miners as separate integration instances
-- Each miner registered as its own device
-- Translations available (English, German)
-- HACS compatible for easy installation and updates
+| | |
+|---|---|
+| 📊 **80+ sensors** | Power, hashrate (instant / 1m / 10m / 1h / 1d), temperatures, shares, difficulty, network, hardware diagnostics |
+| 🎛️ **Full control** | Fan speed, frequency and core voltage as number entities, restart button, custom services for automations |
+| 🔌 **Device support** | BitAxe (standard AxeOS firmware) and NerdAxe (extended API) with automatic capability detection |
+| 🧩 **HA native** | Device classes, state classes, entity categories, long-term statistics, availability tracking |
+| 🌍 **Multi-miner** | Unlimited miners as separate devices; English and German translations |
 
 ---
 
@@ -60,15 +33,14 @@ A comprehensive Home Assistant custom integration for monitoring and controlling
 
 ### HACS (Recommended)
 
+[![Open your Home Assistant instance and add this repository to HACS.](https://my.home-assistant.io/badges/hacs_repository.svg)](https://my.home-assistant.io/redirect/hacs_repository/?owner=fgrfn&repository=AxeOS-HA-Integration&category=integration)
+
 1. Open **HACS** in your Home Assistant instance
-2. Navigate to **Integrations**
-3. Click the **3-dot menu** (top right) → **Custom repositories**
-4. Add repository:
+2. Click the **3-dot menu** (top right) → **Custom repositories**
+3. Add repository:
    - **URL:** `https://github.com/fgrfn/AxeOS-HA-Integration`
    - **Category:** Integration
-5. Click **Explore & Download Repositories**
-6. Search for **"AxeOS HA Integration"**
-7. Click **Download** and restart Home Assistant
+4. Search for **"AxeOS HA Integration"**, click **Download**, and restart Home Assistant
 
 ### Manual Installation
 
@@ -85,16 +57,16 @@ A comprehensive Home Assistant custom integration for monitoring and controlling
 
 ### Adding a Miner
 
-1. Go to **Settings** → **Devices & Services**
-2. Click **+ Add Integration**
-3. Search for **"AxeOS HA Integration"**
-4. Enter:
-   - **Host:** IP address or hostname of your miner (e.g., `192.168.1.100`)
-   - **Name:** Optional friendly name (e.g., "BitAxe Gamma")
-   - **Scan Interval:** How often to poll data (default: 30 seconds)
-5. Click **Submit**
+[![Open your Home Assistant instance and start setting up a new integration.](https://my.home-assistant.io/badges/config_flow_start.svg)](https://my.home-assistant.io/redirect/config_flow_start/?domain=axeos_ha_integration)
 
-### Configuration Options
+1. Go to **Settings** → **Devices & Services** → **+ Add Integration**
+2. Search for **"AxeOS HA Integration"**
+3. Enter:
+   - **Host:** IP address or hostname of your miner (e.g. `192.168.1.100`)
+   - **Name:** Optional friendly name (e.g. "BitAxe Gamma")
+   - **Scan Interval:** How often to poll data (default: 30 seconds)
+
+### Options
 
 After setup, click **Configure** on the integration to adjust:
 
@@ -106,90 +78,87 @@ After setup, click **Configure** on the integration to adjust:
 
 ---
 
-## 📊 Entities Overview
+## 📊 Entities
 
-### Sensors (80+)
+<details>
+<summary><b>Sensors (80+)</b> — click to expand</summary>
 
 #### Power & Performance
-- Power Consumption (W)
-- Voltage (mV), Current (mA)
+- Power Consumption (W), Voltage (mV), Current (mA)
 - Core Voltage Target & Actual (mV)
 - Min/Max Power & Voltage limits
 - Frequency (MHz)
 
-#### Hashrate Metrics
-- Current Hashrate (GH/s)
-- Hashrate 1 minute average
-- Hashrate 10 minutes average
-- Hashrate 1 hour average
-- Hashrate 1 day average
+#### Hashrate
+- Current Hashrate (GH/s) with min/max/avg history attributes
+- 1 minute / 10 minutes / 1 hour / 1 day averages
 - Expected Hashrate
 
 #### Temperature
-- Chip Temperature (°C)
-- VR Temperature (°C)
-- Temperature Target (°C)
-- Overheat Temperature (°C)
+- Chip Temperature (°C), VR Temperature (°C)
+- Temperature Target & Overheat Temperature (°C)
 - PID Controller values (P, I, D)
 
 #### Mining Statistics
-- Shares Accepted
-- Shares Rejected
-- Best Difficulty (session & total)
-- Pool Difficulty
-- Found Blocks (session & total)
-- Duplicate HW Nonces
+- Shares Accepted / Rejected (incl. rejection reasons)
+- Best Difficulty (session & total), Pool Difficulty
+- Found Blocks (session & total), Duplicate HW Nonces
 
 #### Network
-- IP Address
-- WiFi SSID & Status
-- WiFi Signal Strength (dBm)
-- MAC Address
-- Hostname
+- IP Address, Hostname, MAC Address
+- WiFi SSID, Status & Signal Strength (dBm)
 
 #### Hardware
-- ASIC Count & Model
-- Core Count
-- Fan Speed (%) & RPM
-- Manual Fan Speed
-- Free Heap Memory
-- Uptime (seconds)
+- ASIC Count & Model, Core Count
+- Fan Speed (%) & RPM, Manual Fan Speed
+- Free Heap Memory, Uptime
 
-#### Configuration
-- Stratum URL, Port, User
-- Fallback Stratum settings
-- Firmware Version
-- Board/Device Model
-- Running Partition
-- Last Reset Reason
+#### Configuration & Firmware
+- Stratum URL / Port / User (incl. fallback)
+- Firmware Version, Board/Device Model
+- Running Partition, Last Reset Reason
 
 #### NerdAxe Specific
-- VR Frequency
-- Job Interval
-- Pool Mode & Balance
-- Stratum pool details
+- VR Frequency, Job Interval
+- Pool Mode & Balance, Stratum pool details
 - Default Theme
 
-### Binary Sensors (12+)
+</details>
+
+<details>
+<summary><b>Binary Sensors (12+)</b> — click to expand</summary>
+
 - Overheat Mode
 - Using Fallback Stratum
-- Auto Fan Speed
-- Invert Fan Polarity
-- Flip/Invert Screen
 - Shutdown Status
-- Auto Screen Off
 - Keep Stratum Connection
 - OTP Status
 - Enonce Subscribe settings
 
-### Number Entities (3)
-Editable settings with proper validation:
-- **Fan Speed** - Slider (0-100%)
-- **Frequency** - Box (200-600 MHz)
-- **Core Voltage** - Box (1000-1400 mV)
+</details>
 
-### Button
-- **Restart** - Reboot the miner
+<details>
+<summary><b>Controls</b> — click to expand</summary>
+
+#### Number Entities
+- **Fan Speed** — slider (0–100 %)
+- **Frequency** — box (200–600 MHz)
+- **Core Voltage** — box (1000–1400 mV)
+
+#### Switches
+- Auto Fan Speed, Invert Fan Polarity
+- Flip Screen, Invert Screen, Auto Screen Off
+
+#### Button
+- **Restart** — reboot the miner
+
+#### Services
+- `axeos_ha_integration.restart_miner`
+- `axeos_ha_integration.set_frequency`
+- `axeos_ha_integration.set_voltage`
+- `axeos_ha_integration.set_fanspeed`
+
+</details>
 
 ---
 
@@ -205,7 +174,7 @@ automation:
         entity_id: sensor.bitaxe_gamma_chip_temperature
         above: 75
     action:
-      - service: button.press
+      - action: button.press
         target:
           entity_id: button.bitaxe_gamma_restart
 ```
@@ -222,7 +191,7 @@ automation:
         for:
           minutes: 5
     action:
-      - service: notify.mobile_app
+      - action: notify.mobile_app
         data:
           title: "⚠️ Miner Alert"
           message: "BitAxe Gamma hashrate dropped to {{ states('sensor.bitaxe_gamma_current_hashrate') }} GH/s"
@@ -238,41 +207,42 @@ automation:
         entity_id: sensor.bitaxe_gamma_chip_temperature
         above: 60
     action:
-      - service: number.set_value
+      - action: number.set_value
         target:
           entity_id: number.bitaxe_gamma_fan_speed
         data:
           value: 100
 ```
 
-### Service Call Examples
+### Service Calls
+
+The services take the miner entity as a data field:
 
 ```yaml
 # Restart miner
-service: axeos_ha_integration.restart_miner
-target:
+action: axeos_ha_integration.restart_miner
+data:
   entity_id: sensor.bitaxe_gamma_power_consumption
 
 # Set frequency
-service: axeos_ha_integration.set_frequency
-target:
-  entity_id: sensor.bitaxe_gamma_power_consumption
+action: axeos_ha_integration.set_frequency
 data:
+  entity_id: sensor.bitaxe_gamma_power_consumption
   frequency: 525
 
 # Set voltage
-service: axeos_ha_integration.set_voltage
-target:
-  entity_id: sensor.bitaxe_gamma_power_consumption
+action: axeos_ha_integration.set_voltage
 data:
+  entity_id: sensor.bitaxe_gamma_power_consumption
   voltage: 1250
 ```
 
 ---
 
-## 📱 Lovelace Dashboard Examples
+## 📱 Dashboard Examples
 
-### Entities Card
+<details>
+<summary><b>Entities Card</b></summary>
 
 ```yaml
 type: entities
@@ -292,7 +262,10 @@ entities:
     name: Restart
 ```
 
-### Gauge Card
+</details>
+
+<details>
+<summary><b>Gauge Card</b></summary>
 
 ```yaml
 type: gauge
@@ -306,7 +279,10 @@ severity:
   red: 75
 ```
 
-### History Graph Card
+</details>
+
+<details>
+<summary><b>History Graph Card</b></summary>
 
 ```yaml
 type: history-graph
@@ -318,13 +294,15 @@ hours_to_show: 24
 refresh_interval: 0
 ```
 
+</details>
+
 ---
 
 ## 📋 Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for version history and changes.
 
-### Latest Version (1.11.0)
+**Latest version (1.11.0):**
 - 🔧 Compatibility with current Home Assistant releases (options flow fix, coordinator config entry)
 - 🔧 Requires Home Assistant 2024.11 or newer
 - 🔧 Fixed hashrate history losing its first sample
@@ -335,14 +313,6 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and changes.
 ## 📄 License
 
 This project is licensed under the [MIT License](LICENSE).
-
-```
-Copyright (c) 2025 fgrfn
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction...
-```
 
 ---
 
