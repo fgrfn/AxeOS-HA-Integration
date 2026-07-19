@@ -3,5 +3,5 @@
 # version, and any additional constraint here makes pip's resolver fail.
 homeassistant>=2024.11.0
 pytest>=8.0.0
-pytest-asyncio>=0.21.0
+pytest-asyncio>=1.4.0
 pytest-cov>=4.0.0
