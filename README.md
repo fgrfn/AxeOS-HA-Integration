@@ -9,7 +9,6 @@
 [![GitHub Release](https://img.shields.io/github/v/release/fgrfn/AxeOS-HA-Integration?style=for-the-badge)](https://github.com/fgrfn/AxeOS-HA-Integration/releases)
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg?style=for-the-badge)](LICENSE)
 [![HACS](https://img.shields.io/badge/HACS-Custom-41BDF5.svg?style=for-the-badge)](https://github.com/hacs/integration)
-[![Code Quality](https://img.shields.io/badge/code%20quality-A-success?style=for-the-badge)](https://github.com/fgrfn/AxeOS-HA-Integration)
 
 </div>
 
