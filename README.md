@@ -14,7 +14,9 @@
 
 ---
 
-## 🌟 Highlights
+> **Personal learning project:** Built with the help of OpenAI Codex and Claude Code as a way to experiment, learn and create something useful.
+
+## Features
 
 | | |
 |---|---|
@@ -26,7 +28,7 @@
 
 ---
 
-## 📦 Installation
+## Installation
 
 > **Requirement:** Home Assistant 2024.11 or newer.
 
@@ -52,7 +54,7 @@
 
 ---
 
-## ⚙️ Configuration
+## Configuration
 
 ### Adding a Miner
 
@@ -77,7 +79,7 @@ After setup, click **Configure** on the integration to adjust:
 
 ---
 
-## 📊 Entities
+## Entities
 
 <details>
 <summary><b>Sensors (80+)</b> — click to expand</summary>
@@ -161,7 +163,7 @@ After setup, click **Configure** on the integration to adjust:
 
 ---
 
-## 🤖 Automation Examples
+## Automation Examples
 
 ### Restart on High Temperature
 
@@ -238,7 +240,7 @@ data:
 
 ---
 
-## 📱 Dashboard Examples
+## Dashboard Examples
 
 <details>
 <summary><b>Entities Card</b></summary>
@@ -297,7 +299,7 @@ refresh_interval: 0
 
 ---
 
-## 📋 Changelog
+## Changelog
 
 See [CHANGELOG.md](CHANGELOG.md) for version history and changes.
 
@@ -309,13 +311,13 @@ See [CHANGELOG.md](CHANGELOG.md) for version history and changes.
 
 ---
 
-## 📄 License
+## License
 
 This project is licensed under the [MIT License](LICENSE).
 
 ---
 
-## 🔗 Links
+## Links
 
 - **GitHub Repository:** [fgrfn/AxeOS-HA-Integration](https://github.com/fgrfn/AxeOS-HA-Integration)
 - **Issue Tracker:** [Report Issues](https://github.com/fgrfn/AxeOS-HA-Integration/issues)
