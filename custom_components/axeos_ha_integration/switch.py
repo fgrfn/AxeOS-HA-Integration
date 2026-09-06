@@ -7,12 +7,13 @@ from dataclasses import dataclass
 from typing import Any
 
 from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
+from .models import AxeOSConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -32,13 +33,12 @@ SWITCH_TYPES: tuple[AxeOSSwitchEntityDescription, ...] = (
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: AxeOSConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up AxeOS switch entities."""
-    data = hass.data[DOMAIN][entry.entry_id]
-    coordinator = data["coordinator"]
-    api = data["api"]
+    coordinator = entry.runtime_data.coordinator
+    api = entry.runtime_data.api
 
     host = entry.data.get("host") or entry.entry_id
     host_id = str(host).replace(" ", "_").replace(".", "_").lower()
@@ -98,11 +98,11 @@ class AxeOSSwitchEntity(CoordinatorEntity, SwitchEntity):
     async def async_turn_on(self, **kwargs: Any) -> None:
         ok = await self._api.set_setting(self._key, True)
         if not ok:
-            _LOGGER.error("Failed to enable %s", self._key)
+            raise HomeAssistantError(f"Failed to enable {self._key}")
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         ok = await self._api.set_setting(self._key, False)
         if not ok:
-            _LOGGER.error("Failed to disable %s", self._key)
+            raise HomeAssistantError(f"Failed to disable {self._key}")
         await self.coordinator.async_request_refresh()

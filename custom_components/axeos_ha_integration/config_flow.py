@@ -5,15 +5,13 @@ from __future__ import annotations
 from typing import Any
 
 import voluptuous as vol
-
-from homeassistant import config_entries
+from homeassistant import config_entries, exceptions
 from homeassistant.config_entries import ConfigFlowResult
 from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
-from homeassistant import exceptions
 
-from .const import DOMAIN, CONF_HOST, CONF_NAME, DEFAULT_SCAN_INTERVAL
-from .api import AxeOSAPI
+from .api import AxeOSAPI, AxeOSApiError
+from .const import CONF_HOST, CONF_NAME, DEFAULT_SCAN_INTERVAL, DOMAIN
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
@@ -23,12 +21,12 @@ STEP_USER_DATA_SCHEMA = vol.Schema(
     }
 )
 
+
 class CannotConnect(exceptions.HomeAssistantError):
     """Error: Cannot connect to AxeOS miner."""
 
-class AxeOSHaIntegrationConfigFlow(
-    config_entries.ConfigFlow, domain=DOMAIN
-):
+
+class AxeOSHaIntegrationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     """Handle a config flow for AxeOS-HA-Integration."""
 
     VERSION = 1
@@ -37,7 +35,7 @@ class AxeOSHaIntegrationConfigFlow(
     @callback
     def async_get_options_flow(config_entry):
         """Get the options flow for this handler."""
-        return AxeOSOptionsFlowHandler()
+        return AxeOSOptionsFlowHandler(config_entry)
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -56,10 +54,8 @@ class AxeOSHaIntegrationConfigFlow(
                 session = async_get_clientsession(self.hass)
                 api = AxeOSAPI(session, host)
                 try:
-                    info = await api.get_system_info()
-                    if info is None:
-                        raise CannotConnect
-                except CannotConnect:
+                    await api.get_system_info()
+                except AxeOSApiError:
                     errors["base"] = "cannot_connect"
                 except Exception:
                     errors["base"] = "unknown"
@@ -84,6 +80,15 @@ class AxeOSHaIntegrationConfigFlow(
 
 class AxeOSOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle option flow, e.g. scan_interval, logging."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize an options flow across supported HA versions."""
+        self._config_entry = config_entry
+
+    @property
+    def config_entry(self) -> config_entries.ConfigEntry:
+        """Return the config entry associated with this flow."""
+        return self._config_entry
 
     async def async_step_init(self, user_input=None):
         """Manage the options."""

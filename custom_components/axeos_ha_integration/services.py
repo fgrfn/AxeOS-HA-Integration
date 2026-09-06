@@ -12,6 +12,7 @@ from homeassistant.helpers import entity_registry as er
 
 from .api import AxeOSAPI
 from .const import DOMAIN
+from .models import AxeOSRuntimeData
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -60,17 +61,17 @@ def _resolve_api_for_entity(hass: HomeAssistant, entity_id: str) -> tuple[str, A
     if not entry_id:
         raise HomeAssistantError(f"Entity '{entity_id}' is not linked to a config entry")
 
-    entry_data = hass.data.get(DOMAIN, {}).get(entry_id)
-    if not entry_data:
+    config_entry = hass.config_entries.async_get_entry(entry_id)
+    if config_entry is None:
         raise HomeAssistantError(
             f"No integration data found for entity '{entity_id}' (entry: {entry_id})"
         )
 
-    api = entry_data.get("api")
-    if not api:
+    runtime_data = config_entry.runtime_data
+    if not isinstance(runtime_data, AxeOSRuntimeData):
         raise HomeAssistantError(f"No API client available for entity '{entity_id}'")
 
-    return entry_id, api
+    return entry_id, runtime_data.api
 
 
 async def async_setup_services(hass: HomeAssistant) -> None:

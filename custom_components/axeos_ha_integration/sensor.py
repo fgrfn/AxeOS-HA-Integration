@@ -13,13 +13,13 @@ from homeassistant.components.sensor import (
     SensorEntityDescription,
     SensorStateClass,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
+from .models import AxeOSConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -166,10 +166,10 @@ def get_value(data: dict, keys: list[str]) -> Any:
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: AxeOSConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
-    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
+    coordinator = entry.runtime_data.coordinator
     # stabile host-id aus entry.data oder entry_id
     host = entry.data.get("host") or entry.entry_id
     host_id = str(host).replace(" ", "_").replace(".", "_").lower()
