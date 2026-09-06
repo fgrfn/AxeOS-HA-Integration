@@ -1,15 +1,17 @@
+import logging
+from datetime import timedelta
+
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
-from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
-from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers import device_registry as dr
-from datetime import timedelta
-import logging
+from homeassistant.helpers.aiohttp_client import async_get_clientsession
+from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
-from .const import DOMAIN, DEFAULT_SCAN_INTERVAL, CONF_HOST, CONF_NAME
 from .api import AxeOSAPI
+from .const import CONF_HOST, CONF_NAME, DEFAULT_SCAN_INTERVAL, DOMAIN
 from .services import async_setup_services, async_unload_services
+
 
 def get_logger(level):
     logger = logging.getLogger(__name__)

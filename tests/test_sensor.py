@@ -1,7 +1,7 @@
 """Tests for the AxeOS HA Integration sensor platform."""
-import pytest
 from unittest.mock import MagicMock, patch
 
+import pytest
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.const import EntityCategory
 

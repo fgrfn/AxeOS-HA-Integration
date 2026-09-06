@@ -1,7 +1,8 @@
 """Tests for the AxeOS HA Integration API."""
+from unittest.mock import AsyncMock, MagicMock
+
 import pytest
 from aiohttp import ClientSession
-from unittest.mock import AsyncMock, MagicMock, patch
 
 from custom_components.axeos_ha_integration.api import AxeOSAPI
 

@@ -1,14 +1,15 @@
 import asyncio
-import aiohttp
 import logging
+
+import aiohttp
 
 from .const import (
     API_SYSTEM,
+    API_SYSTEM_FANSPEED,
+    API_SYSTEM_FREQUENCY,
     API_SYSTEM_INFO,
     API_SYSTEM_RESTART,
-    API_SYSTEM_FREQUENCY,
     API_SYSTEM_VOLTAGE,
-    API_SYSTEM_FANSPEED,
 )
 
 _LOGGER = logging.getLogger(__name__)
