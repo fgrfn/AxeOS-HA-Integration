@@ -5,7 +5,9 @@ import logging
 from homeassistant.components.button import ButtonEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
+from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .api import AxeOSAPI
 from .const import DOMAIN
@@ -20,6 +22,7 @@ async def async_setup_entry(
 ) -> None:
     """Register the restart button entity for each miner."""
     api: AxeOSAPI = hass.data[DOMAIN][entry.entry_id]["api"]
+    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
     miner_name: str = hass.data[DOMAIN][entry.entry_id]["name"]
     host: str = hass.data[DOMAIN][entry.entry_id]["host"]
 
@@ -27,12 +30,12 @@ async def async_setup_entry(
     host_id = str(host or entry.entry_id).replace(" ", "_").replace(".", "_").lower()
 
     async_add_entities(
-        [AxeOSRestartButton(entry.entry_id, miner_name, host_id, api)],
+        [AxeOSRestartButton(coordinator, entry.entry_id, miner_name, host_id, api)],
         update_before_add=False,
     )
 
 
-class AxeOSRestartButton(ButtonEntity):
+class AxeOSRestartButton(CoordinatorEntity, ButtonEntity):
     """Button to restart the AxeOS miner."""
 
     _attr_has_entity_name = True
@@ -40,12 +43,14 @@ class AxeOSRestartButton(ButtonEntity):
 
     def __init__(
         self,
+        coordinator,
         entry_id: str,
         miner_name: str,
         host_id: str,
         api: AxeOSAPI,
     ) -> None:
         """Initialize the restart button."""
+        super().__init__(coordinator)
         self.entry_id = entry_id
         self.miner_name = miner_name
         self.host_id = host_id
@@ -57,22 +62,23 @@ class AxeOSRestartButton(ButtonEntity):
 
     async def async_press(self) -> None:
         """Called when the button is pressed."""
-        _LOGGER.debug("Restart requested for BitAxe %s (%s)", self.miner_name, self.host_id)
+        _LOGGER.debug(
+            "Restart requested for BitAxe %s (%s)", self.miner_name, self.host_id
+        )
         success = await self.api.restart_system()
-        if success:
-            _LOGGER.info("Restart successfully sent to %s", self.host_id)
-        else:
-            _LOGGER.error("Restart failed for %s", self.host_id)
-    
+        if not success:
+            raise HomeAssistantError(f"Restart failed for {self.host_id}")
+        _LOGGER.info("Restart successfully sent to %s", self.host_id)
+
     @property
     def available(self) -> bool:
         """Return if entity is available."""
-        return bool(self.api.system_info)
+        return self.coordinator.last_update_success
 
     @property
     def device_info(self):
         # Flexibles Mapping für Modell und Version
-        info = getattr(self.api, "system_info", {}) or {}
+        info = self.coordinator.data or {}
         model = info.get("boardVersion") or info.get("deviceModel") or "BitAxe Miner"
         sw_version = info.get("version", "")
         return {

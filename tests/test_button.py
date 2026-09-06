@@ -12,13 +12,16 @@ from custom_components.axeos_ha_integration.const import DOMAIN
 async def test_button_setup_press_and_availability():
     """Set up the button and send a restart command."""
     api = MagicMock()
-    api.system_info = {"boardVersion": "204", "version": "2.0"}
     api.restart_system = AsyncMock(return_value=True)
+    coordinator = MagicMock()
+    coordinator.data = {"boardVersion": "204", "version": "2.0"}
+    coordinator.last_update_success = True
     hass = MagicMock()
     hass.data = {
         DOMAIN: {
             "entry-id": {
                 "api": api,
+                "coordinator": coordinator,
                 "name": "Miner",
                 "host": "192.0.2.1",
             }
@@ -35,5 +38,5 @@ async def test_button_setup_press_and_availability():
     await button.async_press()
     api.restart_system.assert_awaited_once()
 
-    api.system_info = {}
+    coordinator.last_update_success = False
     assert button.available is False

@@ -8,6 +8,7 @@ from typing import Any
 from homeassistant.components.switch import SwitchEntity
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -97,11 +98,11 @@ class AxeOSSwitchEntity(CoordinatorEntity, SwitchEntity):
     async def async_turn_on(self, **kwargs: Any) -> None:
         ok = await self._api.set_setting(self._key, True)
         if not ok:
-            _LOGGER.error("Failed to enable %s", self._key)
+            raise HomeAssistantError(f"Failed to enable {self._key}")
         await self.coordinator.async_request_refresh()
 
     async def async_turn_off(self, **kwargs: Any) -> None:
         ok = await self._api.set_setting(self._key, False)
         if not ok:
-            _LOGGER.error("Failed to disable %s", self._key)
+            raise HomeAssistantError(f"Failed to disable {self._key}")
         await self.coordinator.async_request_refresh()

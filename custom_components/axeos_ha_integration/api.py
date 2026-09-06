@@ -1,5 +1,6 @@
 import asyncio
 import logging
+from typing import Any, cast
 
 import aiohttp
 
@@ -14,104 +15,101 @@ from .const import (
 
 _LOGGER = logging.getLogger(__name__)
 
+API_TIMEOUT = 10
+
+
+class AxeOSApiError(Exception):
+    """Raised when communication with an AxeOS miner fails."""
+
+
 class AxeOSAPI:
     """Client class to communicate with an AxeOS miner via HTTP.
-       Only the /api/system/info endpoint is queried."""
+    Only the /api/system/info endpoint is queried."""
 
     def __init__(self, session: aiohttp.ClientSession, host: str):
         # Remove protocol if already present
         if host.startswith("http://"):
-            host = host[len("http://"):]
+            host = host[len("http://") :]
         self.session = session
         self.host = host
         self.system_info = {}
 
-    async def get_system_info(self) -> dict | None:
-        """Fetches system info (GET /api/system/info)."""
-        url = f"http://{self.host}{API_SYSTEM_INFO}"
+    async def _request(
+        self,
+        method: str,
+        path: str,
+        *,
+        json_body: dict[str, Any] | None = None,
+        expect_json: bool = False,
+    ) -> dict[str, Any] | bool:
+        """Send a request and ensure the response is always released."""
+        url = f"http://{self.host}{path}"
         try:
-            async with asyncio.timeout(10):
-                resp = await self.session.get(url)
-                if resp.status == 200:
-                    self.system_info = await resp.json()
-                    return self.system_info
-                _LOGGER.error("Error fetching system info from %s: %s", url, resp.status)
-                return None
-        except Exception as e:
-            _LOGGER.error("Exception fetching system info from %s: %s", self.host, e)
-            return None
+            async with asyncio.timeout(API_TIMEOUT):
+                async with self.session.request(
+                    method, url, json=json_body
+                ) as response:
+                    if response.status != 200:
+                        raise AxeOSApiError(
+                            f"AxeOS request to {url} returned HTTP {response.status}"
+                        )
+
+                    if not expect_json:
+                        return True
+
+                    payload = await response.json()
+                    if not isinstance(payload, dict):
+                        raise AxeOSApiError(
+                            f"AxeOS request to {url} returned an invalid response"
+                        )
+                    return cast(dict[str, Any], payload)
+        except TimeoutError as err:
+            raise AxeOSApiError(f"AxeOS request to {url} timed out") from err
+        except aiohttp.ClientError as err:
+            raise AxeOSApiError(f"AxeOS request to {url} failed: {err}") from err
+        except ValueError as err:
+            raise AxeOSApiError(
+                f"AxeOS request to {url} returned invalid JSON"
+            ) from err
+
+    async def get_system_info(self) -> dict[str, Any]:
+        """Fetches system info (GET /api/system/info)."""
+        self.system_info = cast(
+            dict[str, Any],
+            await self._request("GET", API_SYSTEM_INFO, expect_json=True),
+        )
+        return self.system_info
 
     async def restart_system(self) -> bool:
         """Restarts the miner (POST /api/system/restart)."""
-        url = f"http://{self.host}{API_SYSTEM_RESTART}"
-        try:
-            async with asyncio.timeout(10):
-                resp = await self.session.post(url)
-                if resp.status == 200:
-                    _LOGGER.info("Restart command sent successfully to %s", self.host)
-                    return True
-                _LOGGER.error("Error restarting miner at %s: %s", url, resp.status)
-                return False
-        except Exception as e:
-            _LOGGER.error("Exception when restarting miner at %s: %s", self.host, e)
-            return False
+        await self._request("POST", API_SYSTEM_RESTART)
+        _LOGGER.info("Restart command sent successfully to %s", self.host)
+        return True
 
     async def set_frequency(self, frequency: int) -> bool:
         """Set the mining frequency."""
-        url = f"http://{self.host}{API_SYSTEM_FREQUENCY}"
-        try:
-            async with asyncio.timeout(10):
-                resp = await self.session.post(url, json={"frequency": frequency})
-                if resp.status == 200:
-                    _LOGGER.info("Frequency set to %s MHz on %s", frequency, self.host)
-                    return True
-                _LOGGER.error("Error setting frequency on %s: %s", url, resp.status)
-                return False
-        except Exception as e:
-            _LOGGER.error("Exception setting frequency on %s: %s", self.host, e)
-            return False
+        await self._request(
+            "POST", API_SYSTEM_FREQUENCY, json_body={"frequency": frequency}
+        )
+        _LOGGER.info("Frequency set to %s MHz on %s", frequency, self.host)
+        return True
 
     async def set_voltage(self, voltage: int) -> bool:
         """Set the core voltage."""
-        url = f"http://{self.host}{API_SYSTEM_VOLTAGE}"
-        try:
-            async with asyncio.timeout(10):
-                resp = await self.session.post(url, json={"voltage": voltage})
-                if resp.status == 200:
-                    _LOGGER.info("Voltage set to %s mV on %s", voltage, self.host)
-                    return True
-                _LOGGER.error("Error setting voltage on %s: %s", url, resp.status)
-                return False
-        except Exception as e:
-            _LOGGER.error("Exception setting voltage on %s: %s", self.host, e)
-            return False
+        await self._request("POST", API_SYSTEM_VOLTAGE, json_body={"voltage": voltage})
+        _LOGGER.info("Voltage set to %s mV on %s", voltage, self.host)
+        return True
 
     async def set_fanspeed(self, fanspeed: int) -> bool:
         """Set the fan speed percentage."""
-        url = f"http://{self.host}{API_SYSTEM_FANSPEED}"
-        try:
-            async with asyncio.timeout(10):
-                resp = await self.session.post(url, json={"fanspeed": fanspeed})
-                if resp.status == 200:
-                    _LOGGER.info("Fan speed set to %s%% on %s", fanspeed, self.host)
-                    return True
-                _LOGGER.error("Error setting fan speed on %s: %s", url, resp.status)
-                return False
-        except Exception as e:
-            _LOGGER.error("Exception setting fan speed on %s: %s", self.host, e)
-            return False
+        await self._request(
+            "POST", API_SYSTEM_FANSPEED, json_body={"fanspeed": fanspeed}
+        )
+        _LOGGER.info("Fan speed set to %s%% on %s", fanspeed, self.host)
+        return True
 
     async def set_setting(self, key: str, value: bool) -> bool:
         """Update a boolean setting via PATCH /api/system."""
-        url = f"http://{self.host}{API_SYSTEM}"
-        try:
-            async with asyncio.timeout(10):
-                resp = await self.session.patch(url, json={key: value})
-                if resp.status == 200:
-                    _LOGGER.info("Setting %s=%s on %s", key, value, self.host)
-                    return True
-                _LOGGER.error("Error setting %s on %s: %s", key, self.host, resp.status)
-                return False
-        except Exception as e:
-            _LOGGER.error("Exception setting %s on %s: %s", key, self.host, e)
-            return False
+        await self._request("PATCH", API_SYSTEM, json_body={key: value})
+        _LOGGER.info("Setting %s=%s on %s", key, value, self.host)
+        return True
