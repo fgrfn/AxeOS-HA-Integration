@@ -3,12 +3,17 @@
 from unittest.mock import AsyncMock, MagicMock
 
 import pytest
-from homeassistant.components.number import NumberMode
 from homeassistant.exceptions import HomeAssistantError
 
 from custom_components.axeos_ha_integration.button import AxeOSRestartButton
-from custom_components.axeos_ha_integration.number import AxeOSNumberEntity
-from custom_components.axeos_ha_integration.switch import AxeOSSwitchEntity
+from custom_components.axeos_ha_integration.number import (
+    NUMBER_TYPES,
+    AxeOSNumberEntity,
+)
+from custom_components.axeos_ha_integration.switch import (
+    SWITCH_TYPES,
+    AxeOSSwitchEntity,
+)
 
 
 @pytest.fixture
@@ -39,15 +44,7 @@ def make_number(coordinator, api, key="fanspeed"):
         coordinator,
         api,
         "entry-id",
-        key,
-        "Fan Speed",
-        "%",
-        key,
-        0,
-        100,
-        1,
-        NumberMode.SLIDER,
-        "mdi:fan",
+        next(description for description in NUMBER_TYPES if description.key == key),
     )
 
 
@@ -103,9 +100,11 @@ async def test_switch_reports_command_failure(coordinator, api):
         api,
         "entry-id",
         "miner",
-        "autofanspeed",
-        "Auto Fan Speed",
-        "mdi:fan-auto",
+        next(
+            description
+            for description in SWITCH_TYPES
+            if description.key == "autofanspeed"
+        ),
     )
 
     with pytest.raises(HomeAssistantError, match="Failed to enable"):

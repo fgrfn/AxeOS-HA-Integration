@@ -28,5 +28,293 @@
         "description": "Integrations-Optionen konfigurieren."
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "power": {
+        "name": "Leistungsaufnahme"
+      },
+      "voltage": {
+        "name": "Spannung"
+      },
+      "current": {
+        "name": "Stromstärke"
+      },
+      "temp": {
+        "name": "Chip-Temperatur"
+      },
+      "vrtemp": {
+        "name": "Spannungsregler-Temperatur"
+      },
+      "maxpower": {
+        "name": "Maximale Leistung"
+      },
+      "minpower": {
+        "name": "Minimale Leistung"
+      },
+      "maxvoltage": {
+        "name": "Maximale Spannung"
+      },
+      "minvoltage": {
+        "name": "Minimale Spannung"
+      },
+      "nominalvoltage": {
+        "name": "Nennspannung"
+      },
+      "hashrate": {
+        "name": "Aktuelle Hashrate"
+      },
+      "hashrate_1m": {
+        "name": "Hashrate (1 Minute)"
+      },
+      "hashrate_10m": {
+        "name": "Hashrate (10 Minuten)"
+      },
+      "hashrate_1h": {
+        "name": "Hashrate (1 Stunde)"
+      },
+      "hashrate_1d": {
+        "name": "Hashrate (1 Tag)"
+      },
+      "expectedhashrate": {
+        "name": "Erwartete Hashrate"
+      },
+      "bestdiff": {
+        "name": "Beste Schwierigkeit"
+      },
+      "bestsessiondiff": {
+        "name": "Beste Sitzungs-Schwierigkeit"
+      },
+      "pooldifficulty": {
+        "name": "Pool-Schwierigkeit"
+      },
+      "stratumdifficulty": {
+        "name": "Stratum-Schwierigkeit"
+      },
+      "corevoltage": {
+        "name": "Ziel-Kernspannung"
+      },
+      "defaultcorevoltage": {
+        "name": "Standard-Kernspannung"
+      },
+      "corevoltageactual": {
+        "name": "Aktuelle Kernspannung"
+      },
+      "frequency": {
+        "name": "Frequenz"
+      },
+      "ip": {
+        "name": "IP-Adresse"
+      },
+      "ssid": {
+        "name": "WLAN-SSID"
+      },
+      "macaddr": {
+        "name": "MAC-Adresse"
+      },
+      "hostname": {
+        "name": "Hostname"
+      },
+      "wifistatus": {
+        "name": "WLAN-Status"
+      },
+      "wifirssi": {
+        "name": "WLAN-Signalstärke"
+      },
+      "sharesaccepted": {
+        "name": "Akzeptierte Shares"
+      },
+      "sharesrejected": {
+        "name": "Abgelehnte Shares"
+      },
+      "uptimeseconds": {
+        "name": "Betriebszeit"
+      },
+      "freeheap": {
+        "name": "Freier Heap-Speicher"
+      },
+      "smallcorecount": {
+        "name": "Gesamtzahl der Kerne"
+      },
+      "asiccount": {
+        "name": "ASIC-Anzahl"
+      },
+      "asicmodel": {
+        "name": "ASIC-Modell"
+      },
+      "stratumurl": {
+        "name": "Stratum-URL"
+      },
+      "stratumport": {
+        "name": "Stratum-Port"
+      },
+      "stratumuser": {
+        "name": "Stratum-Benutzer"
+      },
+      "fallbackstratumurl": {
+        "name": "Fallback-Stratum-URL"
+      },
+      "fallbackstratumport": {
+        "name": "Fallback-Stratum-Port"
+      },
+      "fallbackstratumuser": {
+        "name": "Fallback-Stratum-Benutzer"
+      },
+      "fallbackstratumsuggesteddifficulty": {
+        "name": "Fallback-Stratum-Schwierigkeit"
+      },
+      "fallbackstratumextranoncesubscribe": {
+        "name": "Fallback-Stratum-Extranonce-Abonnement"
+      },
+      "responsetime": {
+        "name": "API-Antwortzeit"
+      },
+      "version": {
+        "name": "Firmware-Version"
+      },
+      "axeosversion": {
+        "name": "AxeOS-Version"
+      },
+      "idfversion": {
+        "name": "IDF-Version"
+      },
+      "boardversion": {
+        "name": "Board-Version"
+      },
+      "fanspeed": {
+        "name": "Lüftergeschwindigkeit (%)"
+      },
+      "manualfanspeed": {
+        "name": "Manuelle Lüftergeschwindigkeit"
+      },
+      "fanrpm": {
+        "name": "Lüfterdrehzahl"
+      },
+      "temptarget": {
+        "name": "Zieltemperatur"
+      },
+      "overheat_temp": {
+        "name": "Überhitzungstemperatur"
+      },
+      "statsfrequency": {
+        "name": "Statistikintervall"
+      },
+      "sharesrejectedreasons": {
+        "name": "Gründe für abgelehnte Shares"
+      },
+      "duplicatehwnonces": {
+        "name": "Doppelte Hardware-Nonces"
+      },
+      "foundblocks": {
+        "name": "Gefundene Blöcke (Sitzung)"
+      },
+      "totalfoundblocks": {
+        "name": "Gefundene Blöcke gesamt"
+      },
+      "defaultfrequency": {
+        "name": "Standardfrequenz"
+      },
+      "vrfrequency": {
+        "name": "Spannungsregler-Frequenz"
+      },
+      "defaultvrfrequency": {
+        "name": "Standard-Spannungsregler-Frequenz"
+      },
+      "jobinterval": {
+        "name": "Job-Intervall"
+      },
+      "lastresetreason": {
+        "name": "Letzter Neustartgrund"
+      },
+      "runningpartition": {
+        "name": "Aktive Partition"
+      },
+      "defaulttheme": {
+        "name": "Standarddesign"
+      },
+      "freeheapint": {
+        "name": "Freier Heap (intern)"
+      },
+      "pidp": {
+        "name": "PID-P-Wert"
+      },
+      "pidi": {
+        "name": "PID-I-Wert"
+      },
+      "pidd": {
+        "name": "PID-D-Wert"
+      },
+      "stratum_poolmode": {
+        "name": "Pool-Modus"
+      },
+      "stratum_activepoolmode": {
+        "name": "Aktiver Pool-Modus"
+      },
+      "stratum_poolbalance": {
+        "name": "Pool-Guthaben"
+      },
+      "stratum_totalbestdiff": {
+        "name": "Beste Stratum-Gesamtschwierigkeit"
+      },
+      "stratum_pooldifficulty": {
+        "name": "Stratum-Pool-Schwierigkeit"
+      }
+    },
+    "binary_sensor": {
+      "overheat_mode": {
+        "name": "Überhitzungsmodus"
+      },
+      "isusingfallbackstratum": {
+        "name": "Fallback-Stratum wird verwendet"
+      },
+      "shutdown": {
+        "name": "Heruntergefahren"
+      },
+      "stratum_keep": {
+        "name": "Stratum-Verbindung beibehalten"
+      },
+      "otp": {
+        "name": "Einmalprogrammierung"
+      },
+      "stratumenoncesubscribe": {
+        "name": "Stratum-Enonce-Abonnement"
+      },
+      "fallbackstratumenoncesubscribe": {
+        "name": "Fallback-Stratum-Enonce-Abonnement"
+      }
+    },
+    "number": {
+      "fanspeed": {
+        "name": "Lüftergeschwindigkeit"
+      },
+      "frequency": {
+        "name": "Frequenz"
+      },
+      "corevoltage": {
+        "name": "Kernspannung"
+      }
+    },
+    "switch": {
+      "autofanspeed": {
+        "name": "Automatische Lüftersteuerung"
+      },
+      "invertfanpolarity": {
+        "name": "Lüfterpolarität umkehren"
+      },
+      "flipscreen": {
+        "name": "Bildschirm drehen"
+      },
+      "invertscreen": {
+        "name": "Bildschirmfarben invertieren"
+      },
+      "autoscreenoff": {
+        "name": "Bildschirm automatisch ausschalten"
+      }
+    },
+    "button": {
+      "restart": {
+        "name": "Neu starten"
+      }
+    }
   }
 }

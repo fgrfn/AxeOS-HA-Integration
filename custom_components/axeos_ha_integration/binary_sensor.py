@@ -3,10 +3,12 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 
 from homeassistant.components.binary_sensor import (
     BinarySensorDeviceClass,
     BinarySensorEntity,
+    BinarySensorEntityDescription,
 )
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
@@ -19,7 +21,7 @@ from .models import AxeOSConfigEntry
 _LOGGER = logging.getLogger(__name__)
 
 # Binary sensor definitions
-BINARY_SENSOR_TYPES: dict[str, tuple[str, list[str], BinarySensorDeviceClass | None, EntityCategory | None]] = {
+_BINARY_SENSOR_DEFINITIONS: dict[str, tuple[str, list[str], BinarySensorDeviceClass | None, EntityCategory | None]] = {
     "overheat_mode": ("Overheat Mode", ["overheat_mode"], BinarySensorDeviceClass.PROBLEM, EntityCategory.DIAGNOSTIC),
     "isUsingFallbackStratum": ("Using Fallback Stratum", ["isUsingFallbackStratum", "stratum.usingFallback"], BinarySensorDeviceClass.CONNECTIVITY, EntityCategory.DIAGNOSTIC),
     # NerdAxe specific binary sensors
@@ -28,6 +30,24 @@ BINARY_SENSOR_TYPES: dict[str, tuple[str, list[str], BinarySensorDeviceClass | N
     "otp": ("One-Time Programming", ["otp"], None, EntityCategory.DIAGNOSTIC),
     "stratumEnonceSubscribe": ("Stratum Enonce Subscribe", ["stratumEnonceSubscribe"], None, EntityCategory.DIAGNOSTIC),
     "fallbackStratumEnonceSubscribe": ("Fallback Stratum Enonce Subscribe", ["fallbackStratumEnonceSubscribe"], None, EntityCategory.DIAGNOSTIC),
+}
+
+@dataclass(frozen=True, kw_only=True)
+class AxeOSBinarySensorEntityDescription(BinarySensorEntityDescription):
+    """Describe an AxeOS binary sensor."""
+
+    data_keys: tuple[str, ...]
+
+
+BINARY_SENSOR_TYPES: dict[str, AxeOSBinarySensorEntityDescription] = {
+    key: AxeOSBinarySensorEntityDescription(
+        key=key,
+        translation_key=key.lower(),
+        device_class=device_class,
+        entity_category=entity_category,
+        data_keys=tuple(path),
+    )
+    for key, (_name, path, device_class, entity_category) in _BINARY_SENSOR_DEFINITIONS.items()
 }
 
 def get_value(data: dict, keys: list[str]) -> bool | None:
@@ -72,14 +92,10 @@ async def async_setup_entry(
     host_id = str(host).replace(" ", "_").replace(".", "_").lower()
 
     entities: list[BinarySensorEntity] = []
-    for key, (suffix, path, device_class, entity_category) in BINARY_SENSOR_TYPES.items():
-        name = suffix
+    for key, description in BINARY_SENSOR_TYPES.items():
         unique_id = f"{host_id}_{key}"
         entities.append(
-            AxeOSBinarySensor(
-                coordinator, entry.entry_id, name, unique_id, path, key,
-                device_class, entity_category
-            )
+            AxeOSBinarySensor(coordinator, entry.entry_id, unique_id, description)
         )
 
     async_add_entities(entities)
@@ -95,21 +111,15 @@ class AxeOSBinarySensor(CoordinatorEntity, BinarySensorEntity):
         self,
         coordinator,
         entry_id: str,
-        name: str,
         unique_id: str,
-        data_keys: list[str],
-        sensor_key: str,
-        device_class: BinarySensorDeviceClass | None = None,
-        entity_category: EntityCategory | None = None,
+        description: AxeOSBinarySensorEntityDescription,
     ) -> None:
         super().__init__(coordinator)
+        self.entity_description = description
         self.entry_id = entry_id
-        self._attr_name = name
         self._attr_unique_id = unique_id
-        self._attr_device_class = device_class
-        self._attr_entity_category = entity_category
-        self.data_keys = data_keys
-        self.sensor_key = sensor_key
+        self.data_keys = list(description.data_keys)
+        self.sensor_key = description.key
 
     @property
     def is_on(self) -> bool | None:

@@ -7,6 +7,14 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Added
+- English and German translations for every sensor, binary sensor, number, switch,
+  and button entity
+
+### Changed
+- Entity metadata is defined with Home Assistant `EntityDescription` classes
+  instead of positional tuples and hard-coded entity names
+
 ## [1.11.0] - 2026-07-13
 
 ### Fixed
