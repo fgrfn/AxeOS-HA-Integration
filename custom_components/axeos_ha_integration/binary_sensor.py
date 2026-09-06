@@ -1,19 +1,20 @@
 """Binary Sensor platform for AxeOS-HA-Integration."""
 
 from __future__ import annotations
+
 import logging
 
 from homeassistant.components.binary_sensor import (
-    BinarySensorEntity,
     BinarySensorDeviceClass,
+    BinarySensorEntity,
 )
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.const import EntityCategory
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
+from .models import AxeOSConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -62,11 +63,11 @@ def get_value(data: dict, keys: list[str]) -> bool | None:
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: AxeOSConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up binary sensors."""
-    coordinator = hass.data[DOMAIN][entry.entry_id]["coordinator"]
+    coordinator = entry.runtime_data.coordinator
     host = entry.data.get("host") or entry.entry_id
     host_id = str(host).replace(" ", "_").replace(".", "_").lower()
 

@@ -6,12 +6,12 @@ import logging
 from typing import Any
 
 from homeassistant.components.switch import SwitchEntity
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
+from .models import AxeOSConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,13 +28,12 @@ SWITCH_TYPES: dict[str, tuple[str, str]] = {
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: AxeOSConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up AxeOS switch entities."""
-    data = hass.data[DOMAIN][entry.entry_id]
-    coordinator = data["coordinator"]
-    api = data["api"]
+    coordinator = entry.runtime_data.coordinator
+    api = entry.runtime_data.api
 
     host = entry.data.get("host") or entry.entry_id
     host_id = str(host).replace(" ", "_").replace(".", "_").lower()

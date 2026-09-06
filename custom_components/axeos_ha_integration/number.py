@@ -2,15 +2,14 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
 
 from homeassistant.components.number import NumberEntity, NumberMode
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
 from .const import DOMAIN
+from .models import AxeOSConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -51,13 +50,12 @@ NUMBER_TYPES: dict[str, tuple[str, str | None, str, float, float, float, NumberM
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: AxeOSConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Set up AxeOS number entities."""
-    data = hass.data[DOMAIN][entry.entry_id]
-    coordinator = data["coordinator"]
-    api = data["api"]
+    coordinator = entry.runtime_data.coordinator
+    api = entry.runtime_data.api
 
     entities = []
     for key, (name, unit, data_path, min_val, max_val, step, mode, icon) in NUMBER_TYPES.items():

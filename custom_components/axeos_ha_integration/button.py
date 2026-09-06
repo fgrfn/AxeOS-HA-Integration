@@ -4,24 +4,24 @@ import logging
 
 from homeassistant.components.button import ButtonEntity
 from homeassistant.core import HomeAssistant
-from homeassistant.config_entries import ConfigEntry
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
 from .api import AxeOSAPI
+from .const import DOMAIN
+from .models import AxeOSConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(
     hass: HomeAssistant,
-    entry: ConfigEntry,
+    entry: AxeOSConfigEntry,
     async_add_entities: AddEntitiesCallback,
 ) -> None:
     """Register the restart button entity for each miner."""
-    api: AxeOSAPI = hass.data[DOMAIN][entry.entry_id]["api"]
-    miner_name: str = hass.data[DOMAIN][entry.entry_id]["name"]
-    host: str = hass.data[DOMAIN][entry.entry_id]["host"]
+    api: AxeOSAPI = entry.runtime_data.api
+    miner_name = entry.runtime_data.name
+    host = entry.runtime_data.host
 
     # stabile host_id aus entry.data oder entry_id
     host_id = str(host or entry.entry_id).replace(" ", "_").replace(".", "_").lower()
