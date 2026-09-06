@@ -1,7 +1,7 @@
 """Tests for the AxeOS HA Integration binary sensor platform."""
-import pytest
 from unittest.mock import MagicMock
 
+import pytest
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.const import EntityCategory
 
