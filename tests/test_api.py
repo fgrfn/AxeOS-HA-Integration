@@ -1,5 +1,4 @@
 """Tests for the AxeOS HA Integration API."""
-
 from unittest.mock import AsyncMock, MagicMock
 
 import aiohttp

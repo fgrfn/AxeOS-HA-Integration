@@ -35,7 +35,7 @@ class AxeOSHaIntegrationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
     @callback
     def async_get_options_flow(config_entry):
         """Get the options flow for this handler."""
-        return AxeOSOptionsFlowHandler()
+        return AxeOSOptionsFlowHandler(config_entry)
 
     async def async_step_user(
         self, user_input: dict[str, Any] | None = None
@@ -80,6 +80,15 @@ class AxeOSHaIntegrationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
 class AxeOSOptionsFlowHandler(config_entries.OptionsFlow):
     """Handle option flow, e.g. scan_interval, logging."""
+
+    def __init__(self, config_entry: config_entries.ConfigEntry) -> None:
+        """Initialize an options flow across supported HA versions."""
+        self._config_entry = config_entry
+
+    @property
+    def config_entry(self) -> config_entries.ConfigEntry:
+        """Return the config entry associated with this flow."""
+        return self._config_entry
 
     async def async_step_init(self, user_input=None):
         """Manage the options."""
