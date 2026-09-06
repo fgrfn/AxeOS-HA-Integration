@@ -1,10 +1,12 @@
 """Number platform for AxeOS HA Integration."""
+
 from __future__ import annotations
 
 import logging
 
 from homeassistant.components.number import NumberEntity, NumberMode
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import HomeAssistantError
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 from homeassistant.helpers.update_coordinator import CoordinatorEntity
 
@@ -14,7 +16,9 @@ from .models import AxeOSConfigEntry
 _LOGGER = logging.getLogger(__name__)
 
 # Define number entities: (name, unit, data_path, min, max, step, mode, icon)
-NUMBER_TYPES: dict[str, tuple[str, str | None, str, float, float, float, NumberMode, str]] = {
+NUMBER_TYPES: dict[
+    str, tuple[str, str | None, str, float, float, float, NumberMode, str]
+] = {
     "fanspeed": (
         "Fan Speed",
         "%",
@@ -58,7 +62,16 @@ async def async_setup_entry(
     api = entry.runtime_data.api
 
     entities = []
-    for key, (name, unit, data_path, min_val, max_val, step, mode, icon) in NUMBER_TYPES.items():
+    for key, (
+        name,
+        unit,
+        data_path,
+        min_val,
+        max_val,
+        step,
+        mode,
+        icon,
+    ) in NUMBER_TYPES.items():
         entities.append(
             AxeOSNumberEntity(
                 coordinator,
@@ -126,20 +139,22 @@ class AxeOSNumberEntity(CoordinatorEntity, NumberEntity):
     @property
     def available(self) -> bool:
         """Return True if entity is available."""
-        return self.coordinator.last_update_success and self.coordinator.data is not None
+        return (
+            self.coordinator.last_update_success and self.coordinator.data is not None
+        )
 
     async def async_set_native_value(self, value: float) -> None:
         """Set new value."""
-        try:
-            # Call the appropriate API method based on the key
-            if self._key == "fanspeed":
-                await self._api.set_fanspeed(int(value))
-            elif self._key == "frequency":
-                await self._api.set_frequency(int(value))
-            elif self._key == "coreVoltage":
-                await self._api.set_voltage(int(value))
-            
-            # Request coordinator update after setting value
-            await self.coordinator.async_request_refresh()
-        except Exception as err:
-            _LOGGER.error("Failed to set %s to %s: %s", self._key, value, err)
+        if self._key == "fanspeed":
+            success = await self._api.set_fanspeed(int(value))
+        elif self._key == "frequency":
+            success = await self._api.set_frequency(int(value))
+        elif self._key == "coreVoltage":
+            success = await self._api.set_voltage(int(value))
+        else:
+            raise HomeAssistantError(f"Unsupported AxeOS setting: {self._key}")
+
+        if not success:
+            raise HomeAssistantError(f"Failed to set {self._key} to {value}")
+
+        await self.coordinator.async_request_refresh()

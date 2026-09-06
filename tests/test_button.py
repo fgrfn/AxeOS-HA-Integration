@@ -1,0 +1,35 @@
+"""Tests for the AxeOS restart button."""
+
+from unittest.mock import AsyncMock, MagicMock
+
+import pytest
+
+from custom_components.axeos_ha_integration.button import async_setup_entry
+from custom_components.axeos_ha_integration.models import AxeOSRuntimeData
+
+
+@pytest.mark.asyncio
+async def test_button_setup_press_and_availability():
+    """Set up the button and send a restart command."""
+    api = MagicMock()
+    api.restart_system = AsyncMock(return_value=True)
+    coordinator = MagicMock()
+    coordinator.data = {"boardVersion": "204", "version": "2.0"}
+    coordinator.last_update_success = True
+    hass = MagicMock()
+    entry = MagicMock(entry_id="entry-id")
+    entry.runtime_data = AxeOSRuntimeData(
+        coordinator=coordinator, api=api, host="192.0.2.1", name="Miner"
+    )
+    async_add_entities = MagicMock()
+
+    await async_setup_entry(hass, entry, async_add_entities)
+
+    button = async_add_entities.call_args.args[0][0]
+    assert button.available is True
+    assert button.device_info["model"] == "204"
+    await button.async_press()
+    api.restart_system.assert_awaited_once()
+
+    coordinator.last_update_success = False
+    assert button.available is False
