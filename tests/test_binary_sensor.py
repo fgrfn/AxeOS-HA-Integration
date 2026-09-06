@@ -1,7 +1,7 @@
 """Tests for the AxeOS HA Integration binary sensor platform."""
-import pytest
 from unittest.mock import MagicMock
 
+import pytest
 from homeassistant.components.binary_sensor import BinarySensorDeviceClass
 from homeassistant.const import EntityCategory
 
@@ -30,16 +30,12 @@ def mock_coordinator():
 
 def make_sensor(coordinator, key: str, entry_id: str = "test_entry") -> AxeOSBinarySensor:
     """Create a binary sensor entity from its BINARY_SENSOR_TYPES definition."""
-    name, path, device_class, entity_category = BINARY_SENSOR_TYPES[key]
+    description = BINARY_SENSOR_TYPES[key]
     return AxeOSBinarySensor(
         coordinator,
         entry_id,
-        name,
         f"{entry_id}_{key}",
-        path,
-        key,
-        device_class,
-        entity_category,
+        description,
     )
 
 
@@ -50,9 +46,9 @@ def test_binary_sensor_types_definition():
 
     # Test binary sensor type structure
     overheat_sensor = BINARY_SENSOR_TYPES["overheat_mode"]
-    assert len(overheat_sensor) == 4
-    assert overheat_sensor[0] == "Overheat Mode"
-    assert overheat_sensor[2] == BinarySensorDeviceClass.PROBLEM
+    assert overheat_sensor.translation_key == "overheat_mode"
+    assert overheat_sensor.data_keys == ("overheat_mode",)
+    assert overheat_sensor.device_class == BinarySensorDeviceClass.PROBLEM
 
 
 def test_get_value_true_values():

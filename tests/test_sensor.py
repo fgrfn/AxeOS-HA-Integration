@@ -1,7 +1,7 @@
 """Tests for the AxeOS HA Integration sensor platform."""
-import pytest
 from unittest.mock import MagicMock, patch
 
+import pytest
 from homeassistant.components.sensor import SensorDeviceClass, SensorStateClass
 from homeassistant.const import EntityCategory
 
@@ -37,18 +37,12 @@ def mock_coordinator():
 
 def make_sensor(coordinator, key: str, entry_id: str = "test_entry") -> AxeOSHASensor:
     """Create a sensor entity from its SENSOR_TYPES definition."""
-    name, unit, path, device_class, state_class, entity_category = SENSOR_TYPES[key]
+    description = SENSOR_TYPES[key]
     return AxeOSHASensor(
         coordinator,
         entry_id,
-        name,
         f"{entry_id}_{key}",
-        unit,
-        path,
-        key,
-        device_class,
-        state_class,
-        entity_category,
+        description,
     )
 
 
@@ -67,12 +61,11 @@ def test_sensor_types_definition():
 
     # Test sensor type structure
     power_sensor = SENSOR_TYPES["power"]
-    assert len(power_sensor) == 6  # 6 elements in tuple
-    assert power_sensor[0] == "Power Consumption"
-    assert power_sensor[1] == "W"
-    assert power_sensor[2] == ["power"]
-    assert power_sensor[3] == SensorDeviceClass.POWER
-    assert power_sensor[4] == SensorStateClass.MEASUREMENT
+    assert power_sensor.translation_key == "power"
+    assert power_sensor.native_unit_of_measurement == "W"
+    assert power_sensor.data_keys == ("power",)
+    assert power_sensor.device_class == SensorDeviceClass.POWER
+    assert power_sensor.state_class == SensorStateClass.MEASUREMENT
 
 
 def test_get_value_flat_key():

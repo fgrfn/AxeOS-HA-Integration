@@ -303,11 +303,11 @@ refresh_interval: 0
 
 See [CHANGELOG.md](CHANGELOG.md) for version history and changes.
 
-**Latest version (1.11.0):**
-- 🔧 Compatibility with current Home Assistant releases (options flow fix, coordinator config entry)
-- 🔧 Requires Home Assistant 2024.11 or newer
-- 🔧 Fixed hashrate history losing its first sample
-- 🔧 Fixed service definitions (removed incompatible target selector)
+**Latest version (1.11.4):**
+- 🔧 Verified with Home Assistant 2024.11 and 2026.9
+- 🔧 Improved device-command error reporting and offline availability
+- ✅ Expanded automated test coverage and added a multi-version CI matrix
+- 🌍 Added translated entity names and modern Home Assistant entity descriptions
 
 ---
 

@@ -2,9 +2,13 @@
 from __future__ import annotations
 
 import logging
-from typing import Any
+from dataclasses import dataclass
 
-from homeassistant.components.number import NumberEntity, NumberMode
+from homeassistant.components.number import (
+    NumberEntity,
+    NumberEntityDescription,
+    NumberMode,
+)
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -14,39 +18,30 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-# Define number entities: (name, unit, data_path, min, max, step, mode, icon)
-NUMBER_TYPES: dict[str, tuple[str, str | None, str, float, float, float, NumberMode, str]] = {
-    "fanspeed": (
-        "Fan Speed",
-        "%",
-        "fanspeed",
-        0,
-        100,
-        1,
-        NumberMode.SLIDER,
-        "mdi:fan",
+@dataclass(frozen=True, kw_only=True)
+class AxeOSNumberEntityDescription(NumberEntityDescription):
+    """Describe an AxeOS number entity."""
+
+    data_path: str
+
+
+NUMBER_TYPES: tuple[AxeOSNumberEntityDescription, ...] = (
+    AxeOSNumberEntityDescription(
+        key="fanspeed", translation_key="fanspeed", native_unit_of_measurement="%",
+        native_min_value=0, native_max_value=100, native_step=1,
+        mode=NumberMode.SLIDER, icon="mdi:fan", data_path="fanspeed",
     ),
-    "frequency": (
-        "Frequency",
-        "MHz",
-        "frequency",
-        200,
-        600,
-        5,
-        NumberMode.BOX,
-        "mdi:sine-wave",
+    AxeOSNumberEntityDescription(
+        key="frequency", translation_key="frequency", native_unit_of_measurement="MHz",
+        native_min_value=200, native_max_value=600, native_step=5,
+        mode=NumberMode.BOX, icon="mdi:sine-wave", data_path="frequency",
     ),
-    "coreVoltage": (
-        "Core Voltage",
-        "mV",
-        "coreVoltage",
-        1000,
-        1400,
-        10,
-        NumberMode.BOX,
-        "mdi:lightning-bolt",
+    AxeOSNumberEntityDescription(
+        key="coreVoltage", translation_key="corevoltage", native_unit_of_measurement="mV",
+        native_min_value=1000, native_max_value=1400, native_step=10,
+        mode=NumberMode.BOX, icon="mdi:lightning-bolt", data_path="coreVoltage",
     ),
-}
+)
 
 
 async def async_setup_entry(
@@ -60,21 +55,13 @@ async def async_setup_entry(
     api = data["api"]
 
     entities = []
-    for key, (name, unit, data_path, min_val, max_val, step, mode, icon) in NUMBER_TYPES.items():
+    for description in NUMBER_TYPES:
         entities.append(
             AxeOSNumberEntity(
                 coordinator,
                 api,
                 entry.entry_id,
-                key,
-                name,
-                unit,
-                data_path,
-                min_val,
-                max_val,
-                step,
-                mode,
-                icon,
+                description,
             )
         )
 
@@ -91,29 +78,15 @@ class AxeOSNumberEntity(CoordinatorEntity, NumberEntity):
         coordinator,
         api,
         entry_id: str,
-        key: str,
-        name: str,
-        unit: str | None,
-        data_path: str,
-        min_val: float,
-        max_val: float,
-        step: float,
-        mode: NumberMode,
-        icon: str,
+        description: AxeOSNumberEntityDescription,
     ) -> None:
         """Initialize the number entity."""
         super().__init__(coordinator)
+        self.entity_description = description
         self._api = api
-        self._key = key
-        self._attr_name = name
-        self._data_path = data_path
-        self._attr_unique_id = f"{entry_id}_{key}"
-        self._attr_native_unit_of_measurement = unit
-        self._attr_native_min_value = min_val
-        self._attr_native_max_value = max_val
-        self._attr_native_step = step
-        self._attr_mode = mode
-        self._attr_icon = icon
+        self._key = description.key
+        self._data_path = description.data_path
+        self._attr_unique_id = f"{entry_id}_{description.key}"
         self._attr_device_info = {
             "identifiers": {(DOMAIN, entry_id)},
         }

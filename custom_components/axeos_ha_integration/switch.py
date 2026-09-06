@@ -3,9 +3,10 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from typing import Any
 
-from homeassistant.components.switch import SwitchEntity
+from homeassistant.components.switch import SwitchEntity, SwitchEntityDescription
 from homeassistant.config_entries import ConfigEntry
 from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
@@ -15,15 +16,18 @@ from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
 
-# Writable boolean settings: key -> (name, icon)
-SWITCH_TYPES: dict[str, tuple[str, str]] = {
-    "autofanspeed": ("Auto Fan Speed", "mdi:fan-auto"),
-    "invertfanpolarity": ("Invert Fan Polarity", "mdi:fan-chevron-down"),
-    "flipscreen": ("Flip Screen", "mdi:screen-rotation"),
-    "invertscreen": ("Invert Screen", "mdi:invert-colors"),
-    # NerdAxe specific
-    "autoscreenoff": ("Auto Screen Off", "mdi:monitor-off"),
-}
+@dataclass(frozen=True, kw_only=True)
+class AxeOSSwitchEntityDescription(SwitchEntityDescription):
+    """Describe an AxeOS switch."""
+
+
+SWITCH_TYPES: tuple[AxeOSSwitchEntityDescription, ...] = (
+    AxeOSSwitchEntityDescription(key="autofanspeed", translation_key="autofanspeed", icon="mdi:fan-auto"),
+    AxeOSSwitchEntityDescription(key="invertfanpolarity", translation_key="invertfanpolarity", icon="mdi:fan-chevron-down"),
+    AxeOSSwitchEntityDescription(key="flipscreen", translation_key="flipscreen", icon="mdi:screen-rotation"),
+    AxeOSSwitchEntityDescription(key="invertscreen", translation_key="invertscreen", icon="mdi:invert-colors"),
+    AxeOSSwitchEntityDescription(key="autoscreenoff", translation_key="autoscreenoff", icon="mdi:monitor-off"),
+)
 
 
 async def async_setup_entry(
@@ -40,8 +44,8 @@ async def async_setup_entry(
     host_id = str(host).replace(" ", "_").replace(".", "_").lower()
 
     entities = [
-        AxeOSSwitchEntity(coordinator, api, entry.entry_id, host_id, key, name, icon)
-        for key, (name, icon) in SWITCH_TYPES.items()
+        AxeOSSwitchEntity(coordinator, api, entry.entry_id, host_id, description)
+        for description in SWITCH_TYPES
     ]
     async_add_entities(entities)
 
@@ -57,16 +61,13 @@ class AxeOSSwitchEntity(CoordinatorEntity, SwitchEntity):
         api,
         entry_id: str,
         host_id: str,
-        key: str,
-        name: str,
-        icon: str,
+        description: AxeOSSwitchEntityDescription,
     ) -> None:
         super().__init__(coordinator)
+        self.entity_description = description
         self._api = api
-        self._key = key
-        self._attr_name = name
-        self._attr_unique_id = f"{host_id}_{key}"
-        self._attr_icon = icon
+        self._key = description.key
+        self._attr_unique_id = f"{host_id}_{description.key}"
         self._attr_device_info = {
             "identifiers": {(DOMAIN, entry_id)},
         }

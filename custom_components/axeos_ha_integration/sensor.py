@@ -4,11 +4,13 @@
 from __future__ import annotations
 
 import logging
+from dataclasses import dataclass
 from typing import Any
 
 from homeassistant.components.sensor import (
-    SensorEntity,
     SensorDeviceClass,
+    SensorEntity,
+    SensorEntityDescription,
     SensorStateClass,
 )
 from homeassistant.config_entries import ConfigEntry
@@ -27,7 +29,7 @@ _LOGGER = logging.getLogger(__name__)
 # value: Tuple (name suffix, unit, data_path, device_class, state_class, entity_category)
 # data_path: key in coordinator.data (e.g. "power", "voltage", "hashRate", etc.)
 # -------------------------------------------------------------------------
-SENSOR_TYPES: dict[str, tuple[str, str | None, list[str], SensorDeviceClass | None, SensorStateClass | None, EntityCategory | None]] = {
+_SENSOR_DEFINITIONS: dict[str, tuple[str, str | None, list[str], SensorDeviceClass | None, SensorStateClass | None, EntityCategory | None]] = {
     "power": ("Power Consumption", "W", ["power"], SensorDeviceClass.POWER, SensorStateClass.MEASUREMENT, None),
     "voltage": ("Voltage", "mV", ["voltage"], SensorDeviceClass.VOLTAGE, SensorStateClass.MEASUREMENT, None),
     "current": ("Current", "mA", ["current"], SensorDeviceClass.CURRENT, SensorStateClass.MEASUREMENT, None),
@@ -109,6 +111,33 @@ SENSOR_TYPES: dict[str, tuple[str, str | None, list[str], SensorDeviceClass | No
     "stratum_poolDifficulty": ("Stratum Pool Difficulty", None, ["stratum", "poolDifficulty"], None, None, EntityCategory.DIAGNOSTIC),
 }
 
+@dataclass(frozen=True, kw_only=True)
+class AxeOSSensorEntityDescription(SensorEntityDescription):
+    """Describe an AxeOS sensor."""
+
+    data_keys: tuple[str, ...]
+
+
+SENSOR_TYPES: dict[str, AxeOSSensorEntityDescription] = {
+    key: AxeOSSensorEntityDescription(
+        key=key,
+        translation_key=key.lower(),
+        native_unit_of_measurement=unit,
+        device_class=device_class,
+        state_class=state_class,
+        entity_category=entity_category,
+        data_keys=tuple(path),
+    )
+    for key, (
+        _name,
+        unit,
+        path,
+        device_class,
+        state_class,
+        entity_category,
+    ) in _SENSOR_DEFINITIONS.items()
+}
+
 def get_value(data: dict, keys: list[str]) -> Any:
     """Get value from data dict, supporting nested keys.
     
@@ -149,18 +178,14 @@ async def async_setup_entry(
     hide_temp_sensors = entry.options.get("hide_temperature_sensors", False)
 
     entities: list[SensorEntity] = []
-    for key, (suffix, unit, path, device_class, state_class, entity_category) in SENSOR_TYPES.items():
+    for key, description in SENSOR_TYPES.items():
         # Skip temperature sensors if option is enabled
         if hide_temp_sensors and key in ["temp", "vrTemp", "temptarget"]:
             continue
             
-        name = suffix
         unique_id = f"{host_id}_{key}"
         entities.append(
-            AxeOSHASensor(
-                coordinator, entry.entry_id, name, unique_id, unit, path, key,
-                device_class, state_class, entity_category
-            )
+            AxeOSHASensor(coordinator, entry.entry_id, unique_id, description)
         )
 
     async_add_entities(entities)
@@ -175,35 +200,25 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         self,
         coordinator,
         entry_id: str,
-        name: str,
         unique_id: str,
-        unit: str | None,
-        data_keys: list[str],
-        sensor_key: str | None = None,
-        device_class: SensorDeviceClass | None = None,
-        state_class: SensorStateClass | None = None,
-        entity_category: EntityCategory | None = None,
+        description: AxeOSSensorEntityDescription,
     ) -> None:
         super().__init__(coordinator)
+        self.entity_description = description
         self.entry_id = entry_id
-        self._attr_name = name
         self._attr_unique_id = unique_id
-        self._attr_native_unit_of_measurement = unit
-        self._attr_device_class = device_class
-        self._attr_state_class = state_class
-        self._attr_entity_category = entity_category
-        self.data_keys = data_keys
-        self.sensor_key = sensor_key or (unique_id.split("_")[-1] if "_" in unique_id else unique_id)
+        self.data_keys = list(description.data_keys)
+        self.sensor_key = description.key
         self._state = None
         
         # Set suggested display precision for specific sensors
-        if sensor_key in ["hashRate", "expectedHashrate"]:
+        if description.key in ["hashRate", "expectedHashrate"]:
             self._attr_suggested_display_precision = 0
-        elif sensor_key in ["power", "voltage", "current", "coreVoltageActual"]:
+        elif description.key in ["power", "voltage", "current", "coreVoltageActual"]:
             self._attr_suggested_display_precision = 2
-        elif sensor_key in ["temp", "vrTemp", "temptarget"]:
+        elif description.key in ["temp", "vrTemp", "temptarget"]:
             self._attr_suggested_display_precision = 1
-        elif sensor_key == "frequency":
+        elif description.key == "frequency":
             self._attr_suggested_display_precision = 0
 
     @property

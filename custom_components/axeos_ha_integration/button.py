@@ -2,15 +2,21 @@
 
 import logging
 
-from homeassistant.components.button import ButtonEntity
-from homeassistant.core import HomeAssistant
+from homeassistant.components.button import ButtonEntity, ButtonEntityDescription
 from homeassistant.config_entries import ConfigEntry
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.entity_platform import AddEntitiesCallback
 
-from .const import DOMAIN
 from .api import AxeOSAPI
+from .const import DOMAIN
 
 _LOGGER = logging.getLogger(__name__)
+
+RESTART_BUTTON_DESCRIPTION = ButtonEntityDescription(
+    key="restart",
+    translation_key="restart",
+    icon="mdi:restart",
+)
 
 
 async def async_setup_entry(
@@ -51,8 +57,7 @@ class AxeOSRestartButton(ButtonEntity):
         self.host_id = host_id
         self.api = api
 
-        self._attr_name = "Restart"
-        self._attr_icon = "mdi:restart"
+        self.entity_description = RESTART_BUTTON_DESCRIPTION
         self._attr_unique_id = f"{host_id}_restart_button"
 
     async def async_press(self) -> None:

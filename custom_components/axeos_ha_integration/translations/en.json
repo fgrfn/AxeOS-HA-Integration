@@ -28,5 +28,293 @@
         "description": "Configure integration options."
       }
     }
+  },
+  "entity": {
+    "sensor": {
+      "power": {
+        "name": "Power Consumption"
+      },
+      "voltage": {
+        "name": "Voltage"
+      },
+      "current": {
+        "name": "Current"
+      },
+      "temp": {
+        "name": "Chip Temperature"
+      },
+      "vrtemp": {
+        "name": "VR Temperature"
+      },
+      "maxpower": {
+        "name": "Max Power"
+      },
+      "minpower": {
+        "name": "Min Power"
+      },
+      "maxvoltage": {
+        "name": "Max Voltage"
+      },
+      "minvoltage": {
+        "name": "Min Voltage"
+      },
+      "nominalvoltage": {
+        "name": "Nominal Voltage"
+      },
+      "hashrate": {
+        "name": "Current Hashrate"
+      },
+      "hashrate_1m": {
+        "name": "Hashrate (1 minute)"
+      },
+      "hashrate_10m": {
+        "name": "Hashrate (10 minutes)"
+      },
+      "hashrate_1h": {
+        "name": "Hashrate (1 hour)"
+      },
+      "hashrate_1d": {
+        "name": "Hashrate (1 day)"
+      },
+      "expectedhashrate": {
+        "name": "Expected Hashrate"
+      },
+      "bestdiff": {
+        "name": "Best Difficulty"
+      },
+      "bestsessiondiff": {
+        "name": "Best Session Difficulty"
+      },
+      "pooldifficulty": {
+        "name": "Pool Difficulty"
+      },
+      "stratumdifficulty": {
+        "name": "Stratum Difficulty"
+      },
+      "corevoltage": {
+        "name": "Core Voltage Target"
+      },
+      "defaultcorevoltage": {
+        "name": "Default Core Voltage"
+      },
+      "corevoltageactual": {
+        "name": "Core Voltage Actual"
+      },
+      "frequency": {
+        "name": "Frequency"
+      },
+      "ip": {
+        "name": "IP Address"
+      },
+      "ssid": {
+        "name": "WiFi SSID"
+      },
+      "macaddr": {
+        "name": "MAC Address"
+      },
+      "hostname": {
+        "name": "Hostname"
+      },
+      "wifistatus": {
+        "name": "WiFi Status"
+      },
+      "wifirssi": {
+        "name": "WiFi Signal Strength"
+      },
+      "sharesaccepted": {
+        "name": "Accepted Shares"
+      },
+      "sharesrejected": {
+        "name": "Rejected Shares"
+      },
+      "uptimeseconds": {
+        "name": "Uptime"
+      },
+      "freeheap": {
+        "name": "Free Heap Memory"
+      },
+      "smallcorecount": {
+        "name": "Total Core Count"
+      },
+      "asiccount": {
+        "name": "ASIC Count"
+      },
+      "asicmodel": {
+        "name": "ASIC Model"
+      },
+      "stratumurl": {
+        "name": "Stratum URL"
+      },
+      "stratumport": {
+        "name": "Stratum Port"
+      },
+      "stratumuser": {
+        "name": "Stratum User"
+      },
+      "fallbackstratumurl": {
+        "name": "Fallback Stratum URL"
+      },
+      "fallbackstratumport": {
+        "name": "Fallback Stratum Port"
+      },
+      "fallbackstratumuser": {
+        "name": "Fallback Stratum User"
+      },
+      "fallbackstratumsuggesteddifficulty": {
+        "name": "Fallback Stratum Difficulty"
+      },
+      "fallbackstratumextranoncesubscribe": {
+        "name": "Fallback Stratum Extranonce Subscribe"
+      },
+      "responsetime": {
+        "name": "API Response Time"
+      },
+      "version": {
+        "name": "Firmware Version"
+      },
+      "axeosversion": {
+        "name": "AxeOS Version"
+      },
+      "idfversion": {
+        "name": "IDF Version"
+      },
+      "boardversion": {
+        "name": "Board Version"
+      },
+      "fanspeed": {
+        "name": "Fan Speed (%)"
+      },
+      "manualfanspeed": {
+        "name": "Manual Fan Speed"
+      },
+      "fanrpm": {
+        "name": "Fan RPM"
+      },
+      "temptarget": {
+        "name": "Temperature Target"
+      },
+      "overheat_temp": {
+        "name": "Overheat Temperature"
+      },
+      "statsfrequency": {
+        "name": "Stats Frequency"
+      },
+      "sharesrejectedreasons": {
+        "name": "Rejected Shares Reasons"
+      },
+      "duplicatehwnonces": {
+        "name": "Duplicate HW Nonces"
+      },
+      "foundblocks": {
+        "name": "Found Blocks (Session)"
+      },
+      "totalfoundblocks": {
+        "name": "Total Found Blocks"
+      },
+      "defaultfrequency": {
+        "name": "Default Frequency"
+      },
+      "vrfrequency": {
+        "name": "VR Frequency"
+      },
+      "defaultvrfrequency": {
+        "name": "Default VR Frequency"
+      },
+      "jobinterval": {
+        "name": "Job Interval"
+      },
+      "lastresetreason": {
+        "name": "Last Reset Reason"
+      },
+      "runningpartition": {
+        "name": "Running Partition"
+      },
+      "defaulttheme": {
+        "name": "Default Theme"
+      },
+      "freeheapint": {
+        "name": "Free Heap (Internal)"
+      },
+      "pidp": {
+        "name": "PID P Value"
+      },
+      "pidi": {
+        "name": "PID I Value"
+      },
+      "pidd": {
+        "name": "PID D Value"
+      },
+      "stratum_poolmode": {
+        "name": "Pool Mode"
+      },
+      "stratum_activepoolmode": {
+        "name": "Active Pool Mode"
+      },
+      "stratum_poolbalance": {
+        "name": "Pool Balance"
+      },
+      "stratum_totalbestdiff": {
+        "name": "Stratum Total Best Difficulty"
+      },
+      "stratum_pooldifficulty": {
+        "name": "Stratum Pool Difficulty"
+      }
+    },
+    "binary_sensor": {
+      "overheat_mode": {
+        "name": "Overheat Mode"
+      },
+      "isusingfallbackstratum": {
+        "name": "Using Fallback Stratum"
+      },
+      "shutdown": {
+        "name": "Shutdown"
+      },
+      "stratum_keep": {
+        "name": "Keep Stratum Connection"
+      },
+      "otp": {
+        "name": "One-Time Programming"
+      },
+      "stratumenoncesubscribe": {
+        "name": "Stratum Enonce Subscribe"
+      },
+      "fallbackstratumenoncesubscribe": {
+        "name": "Fallback Stratum Enonce Subscribe"
+      }
+    },
+    "number": {
+      "fanspeed": {
+        "name": "Fan speed"
+      },
+      "frequency": {
+        "name": "Frequency"
+      },
+      "corevoltage": {
+        "name": "Core voltage"
+      }
+    },
+    "switch": {
+      "autofanspeed": {
+        "name": "Automatic fan speed"
+      },
+      "invertfanpolarity": {
+        "name": "Invert fan polarity"
+      },
+      "flipscreen": {
+        "name": "Flip screen"
+      },
+      "invertscreen": {
+        "name": "Invert screen"
+      },
+      "autoscreenoff": {
+        "name": "Automatic screen off"
+      }
+    },
+    "button": {
+      "restart": {
+        "name": "Restart"
+      }
+    }
   }
 }
