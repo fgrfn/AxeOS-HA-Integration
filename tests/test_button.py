@@ -5,7 +5,7 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 
 from custom_components.axeos_ha_integration.button import async_setup_entry
-from custom_components.axeos_ha_integration.const import DOMAIN
+from custom_components.axeos_ha_integration.models import AxeOSRuntimeData
 
 
 @pytest.mark.asyncio
@@ -17,17 +17,10 @@ async def test_button_setup_press_and_availability():
     coordinator.data = {"boardVersion": "204", "version": "2.0"}
     coordinator.last_update_success = True
     hass = MagicMock()
-    hass.data = {
-        DOMAIN: {
-            "entry-id": {
-                "api": api,
-                "coordinator": coordinator,
-                "name": "Miner",
-                "host": "192.0.2.1",
-            }
-        }
-    }
     entry = MagicMock(entry_id="entry-id")
+    entry.runtime_data = AxeOSRuntimeData(
+        coordinator=coordinator, api=api, host="192.0.2.1", name="Miner"
+    )
     async_add_entities = MagicMock()
 
     await async_setup_entry(hass, entry, async_add_entities)

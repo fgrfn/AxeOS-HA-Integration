@@ -4,7 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from custom_components.axeos_ha_integration.const import DOMAIN
+from custom_components.axeos_ha_integration.models import AxeOSRuntimeData
 from custom_components.axeos_ha_integration.number import async_setup_entry
 
 
@@ -20,8 +20,10 @@ async def test_number_setup_values_and_commands():
     api.set_frequency = AsyncMock(return_value=True)
     api.set_voltage = AsyncMock(return_value=True)
     hass = MagicMock()
-    hass.data = {DOMAIN: {"entry-id": {"coordinator": coordinator, "api": api}}}
     entry = MagicMock(entry_id="entry-id")
+    entry.runtime_data = AxeOSRuntimeData(
+        coordinator=coordinator, api=api, host="192.0.2.1", name="Miner"
+    )
     async_add_entities = MagicMock()
 
     await async_setup_entry(hass, entry, async_add_entities)

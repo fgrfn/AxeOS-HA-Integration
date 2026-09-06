@@ -6,6 +6,7 @@ import pytest
 from homeassistant.exceptions import HomeAssistantError
 
 from custom_components.axeos_ha_integration.const import DOMAIN
+from custom_components.axeos_ha_integration.models import AxeOSRuntimeData
 from custom_components.axeos_ha_integration.services import (
     SERVICE_RESTART,
     SERVICE_SET_FANSPEED,
@@ -25,7 +26,11 @@ def make_hass_and_api():
     api.set_voltage = AsyncMock(return_value=True)
     api.set_fanspeed = AsyncMock(return_value=True)
     hass = MagicMock()
-    hass.data = {DOMAIN: {"entry-id": {"api": api}}}
+    config_entry = MagicMock()
+    config_entry.runtime_data = AxeOSRuntimeData(
+        coordinator=MagicMock(), api=api, host="192.0.2.1", name="Miner"
+    )
+    hass.config_entries.async_get_entry.return_value = config_entry
     hass.services.has_service.return_value = False
     entity_registry = MagicMock()
     entity_registry.async_get.return_value = MagicMock(config_entry_id="entry-id")
