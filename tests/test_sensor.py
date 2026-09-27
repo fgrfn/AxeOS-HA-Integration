@@ -9,6 +9,7 @@ from custom_components.axeos_ha_integration.sensor import (
     SENSOR_TYPES,
     AxeOSHASensor,
     get_value,
+    pool_dashboard_url,
 )
 
 
@@ -88,6 +89,41 @@ def test_get_value_missing():
     """Test get_value with a missing key."""
     assert get_value({"power": 12.5}, ["nonexistent"]) is None
     assert get_value({}, []) is None
+
+
+def test_pool_dashboard_url_for_btc_pow_lab():
+    """Build a dashboard URL only for the exact BTC PoW Lab host."""
+    wallet = "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+    assert pool_dashboard_url({
+        "stratumURL": "stratum+tcp://stratum.btcpowlab-pool.com:3333",
+        "stratumUser": f"{wallet}.garage",
+    }) == f"https://btcpowlab-pool.com/miner/{wallet}"
+
+
+@pytest.mark.parametrize(
+    ("host", "user"),
+    [
+        ("evilstratum.btcpowlab-pool.com", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),
+        ("stratum.btcpowlab-pool.com.evil.test", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),
+        ("stratum.btcpowlab-pool.com", "not a wallet"),
+        ("public-pool.io", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),
+    ],
+)
+def test_pool_dashboard_url_rejects_other_hosts_and_invalid_users(host, user):
+    """Do not create links for lookalike hosts or invalid users."""
+    assert pool_dashboard_url({"stratumURL": host, "stratumUser": user}) is None
+
+
+def test_pool_dashboard_sensor(mock_coordinator):
+    """Expose the contextual dashboard as a diagnostic sensor."""
+    wallet = "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+    mock_coordinator.data.update({
+        "stratumURL": "stratum.btcpowlab-pool.com",
+        "stratumUser": wallet,
+    })
+    sensor = make_sensor(mock_coordinator, "poolDashboard")
+    refresh(sensor)
+    assert sensor.native_value == f"https://btcpowlab-pool.com/miner/{wallet}"
 
 
 def test_sensor_native_value(mock_coordinator):

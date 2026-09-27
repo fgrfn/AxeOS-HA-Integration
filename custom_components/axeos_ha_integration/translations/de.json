@@ -151,6 +151,9 @@
       "stratumuser": {
         "name": "Stratum-Benutzer"
       },
+      "pooldashboard": {
+        "name": "Pool-Dashboard"
+      },
       "fallbackstratumurl": {
         "name": "Fallback-Stratum-URL"
       },
