@@ -1,7 +1,9 @@
 # Test Requirements
 # aiohttp is intentionally not listed: homeassistant pins an exact aiohttp
 # version, and any additional constraint here makes pip's resolver fail.
-homeassistant>=2026.9.3
+# Keep this aligned with the oldest supported Home Assistant release in the
+# test matrix. Newer releases are installed explicitly by the matrix jobs.
+homeassistant>=2024.11.0
 pytest>=9.1.1
 pytest-asyncio>=1.4.0
 pytest-cov>=7.1.0

@@ -11,3 +11,7 @@ updates:
     schedule:
       interval: "weekly"
     open-pull-requests-limit: 10
+    ignore:
+      # This is a compatibility floor, not a dependency to keep at latest.
+      # The test matrix pins newer Home Assistant releases explicitly.
+      - dependency-name: "homeassistant"
