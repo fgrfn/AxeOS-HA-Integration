@@ -4,8 +4,10 @@
 from __future__ import annotations
 
 import logging
+import re
 from dataclasses import dataclass
 from typing import Any
+from urllib.parse import quote, urlsplit
 
 from homeassistant.components.sensor import (
     SensorDeviceClass,
@@ -22,6 +24,33 @@ from .const import DOMAIN
 from .models import AxeOSConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
+
+_BTC_POW_LAB_HOST = "stratum.btcpowlab-pool.com"
+_BITCOIN_ADDRESS = re.compile(
+    r"^(?:bc1[ac-hj-np-z02-9]{11,71}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$",
+    re.IGNORECASE,
+)
+
+
+def pool_dashboard_url(data: dict[str, Any]) -> str | None:
+    """Return a pool dashboard URL for an exact supported Stratum host."""
+    raw_host = str(data.get("stratumURL") or "").strip()
+    raw_user = str(data.get("stratumUser") or "").strip()
+    if not raw_host or not raw_user:
+        return None
+
+    candidate = raw_host if "://" in raw_host else f"stratum+tcp://{raw_host}"
+    try:
+        host = urlsplit(candidate).hostname
+    except ValueError:
+        return None
+
+    address = raw_user.split(".", 1)[0]
+    if host is None or host.lower() != _BTC_POW_LAB_HOST:
+        return None
+    if not _BITCOIN_ADDRESS.fullmatch(address):
+        return None
+    return f"https://btcpowlab-pool.com/miner/{quote(address, safe='')}"
 
 # -------------------------------------------------------------------------
 # SENSOR_TYPES: Mapping of relevant fields from /api/system/info to Home Assistant
@@ -70,6 +99,7 @@ _SENSOR_DEFINITIONS: dict[str, tuple[str, str | None, list[str], SensorDeviceCla
     "stratumURL": ("Stratum URL", None, ["stratumURL"], None, None, EntityCategory.DIAGNOSTIC),
     "stratumPort": ("Stratum Port", None, ["stratumPort"], None, None, EntityCategory.DIAGNOSTIC),
     "stratumUser": ("Stratum User", None, ["stratumUser"], None, None, EntityCategory.DIAGNOSTIC),
+    "poolDashboard": ("Pool Dashboard", None, ["stratumURL", "stratumUser"], None, None, EntityCategory.DIAGNOSTIC),
     "fallbackStratumURL": ("Fallback Stratum URL", None, ["fallbackStratumURL"], None, None, EntityCategory.DIAGNOSTIC),
     "fallbackStratumPort": ("Fallback Stratum Port", None, ["fallbackStratumPort"], None, None, EntityCategory.DIAGNOSTIC),
     "fallbackStratumUser": ("Fallback Stratum User", None, ["fallbackStratumUser"], None, None, EntityCategory.DIAGNOSTIC),
@@ -231,6 +261,8 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
         return self.coordinator.last_update_success and self._state is not None
 
     def _get_value_from_data(self) -> Any:
+        if self.sensor_key == "poolDashboard":
+            return pool_dashboard_url(self.coordinator.data)
         return get_value(self.coordinator.data, self.data_keys)
 
     def _handle_coordinator_update(self) -> None:
@@ -282,6 +314,7 @@ class AxeOSHASensor(CoordinatorEntity, SensorEntity):
             "ssid": "mdi:wifi",
             "macAddr": "mdi:network",
             "hostname": "mdi:network",
+            "poolDashboard": "mdi:open-in-new",
         }
         key = self._attr_unique_id.split("_")[-1]
         return icons.get(key, "mdi:chip")
