@@ -103,6 +103,8 @@ WALLET = "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
         ("eusolo.ckpool.org", f"https://eusolostats.ckpool.org/users/{WALLET}"),
         ("AUSOLO.ckpool.org", f"https://ausolostats.ckpool.org/users/{WALLET}"),
         ("mine.ocean.xyz", f"https://ocean.xyz/stats/{WALLET}"),
+        ("stratum+tcp://btc.hmpool.io:3334", f"https://hmpool.io/miner.html?address={WALLET}"),
+        ("eu.btc.hmpool.io", f"https://hmpool.io/miner.html?address={WALLET}"),
     ],
 )
 def test_pool_dashboard_url_for_supported_pools(host, expected):
@@ -120,6 +122,7 @@ def test_pool_dashboard_url_for_supported_pools(host, expected):
         ("stratum.btcpowlab-pool.com.evil.test", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),
         ("stratum.btcpowlab-pool.com", "not a wallet"),
         ("public-pool.io.evil.test", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),
+        ("hmpool.io", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),
         ("ckpool.org", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),
         ("mine.ocean.xyz", "not a wallet"),
         ("stratum.braiins.com", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),

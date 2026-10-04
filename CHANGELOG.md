@@ -10,7 +10,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Added
 - Pool Dashboard sensor now also links to the per-address dashboards of
   Public Pool (`public-pool.io`), CKPool Solo (`solo`/`eusolo`/`ausolo.ckpool.org`)
-  and OCEAN (`mine.ocean.xyz`), in addition to BTC PoW Lab
+  OCEAN (`mine.ocean.xyz`) and
+  HashedMax (`btc`/`eu.btc.hmpool.io`), in addition to BTC PoW Lab
 - English and German translations for every sensor, binary sensor, number, switch,
   and button entity
 

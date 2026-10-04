@@ -34,6 +34,8 @@ _POOL_DASHBOARDS: dict[str, str] = {
     "eusolo.ckpool.org": "https://eusolostats.ckpool.org/users/{address}",
     "ausolo.ckpool.org": "https://ausolostats.ckpool.org/users/{address}",
     "mine.ocean.xyz": "https://ocean.xyz/stats/{address}",
+    "btc.hmpool.io": "https://hmpool.io/miner.html?address={address}",
+    "eu.btc.hmpool.io": "https://hmpool.io/miner.html?address={address}",
 }
 _BITCOIN_ADDRESS = re.compile(
     r"^(?:bc1[ac-hj-np-z02-9]{11,71}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$",
