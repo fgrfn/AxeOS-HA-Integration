@@ -122,6 +122,7 @@ After setup, click **Configure** on the integration to adjust:
 #### NerdAxe Specific
 - VR Frequency, Job Interval
 - Pool Mode & Balance, Stratum pool details
+- Pool Dashboard link for BTC PoW Lab, Public Pool, CKPool Solo and OCEAN
 - Default Theme
 
 </details>
