@@ -91,13 +91,28 @@ def test_get_value_missing():
     assert get_value({}, []) is None
 
 
-def test_pool_dashboard_url_for_btc_pow_lab():
-    """Build a dashboard URL only for the exact BTC PoW Lab host."""
-    wallet = "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+WALLET = "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"
+
+
+@pytest.mark.parametrize(
+    ("host", "expected"),
+    [
+        ("stratum+tcp://stratum.btcpowlab-pool.com:3333", f"https://btcpowlab-pool.com/miner/{WALLET}"),
+        ("public-pool.io", f"https://web.public-pool.io/#/app/{WALLET}"),
+        ("stratum+tcp://solo.ckpool.org:3333", f"https://solostats.ckpool.org/users/{WALLET}"),
+        ("eusolo.ckpool.org", f"https://eusolostats.ckpool.org/users/{WALLET}"),
+        ("AUSOLO.ckpool.org", f"https://ausolostats.ckpool.org/users/{WALLET}"),
+        ("mine.ocean.xyz", f"https://ocean.xyz/stats/{WALLET}"),
+        ("stratum+tcp://btc.hmpool.io:3334", f"https://hmpool.io/miner.html?address={WALLET}"),
+        ("eu.btc.hmpool.io", f"https://hmpool.io/miner.html?address={WALLET}"),
+    ],
+)
+def test_pool_dashboard_url_for_supported_pools(host, expected):
+    """Build a dashboard URL for each exact supported Stratum host."""
     assert pool_dashboard_url({
-        "stratumURL": "stratum+tcp://stratum.btcpowlab-pool.com:3333",
-        "stratumUser": f"{wallet}.garage",
-    }) == f"https://btcpowlab-pool.com/miner/{wallet}"
+        "stratumURL": host,
+        "stratumUser": f"{WALLET}.garage",
+    }) == expected
 
 
 @pytest.mark.parametrize(
@@ -106,7 +121,11 @@ def test_pool_dashboard_url_for_btc_pow_lab():
         ("evilstratum.btcpowlab-pool.com", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),
         ("stratum.btcpowlab-pool.com.evil.test", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),
         ("stratum.btcpowlab-pool.com", "not a wallet"),
-        ("public-pool.io", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),
+        ("public-pool.io.evil.test", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),
+        ("hmpool.io", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),
+        ("ckpool.org", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),
+        ("mine.ocean.xyz", "not a wallet"),
+        ("stratum.braiins.com", "bc1qxy2kgdygjrsqtzq2n0yrf2493p83kkfjhx0wlh"),
     ],
 )
 def test_pool_dashboard_url_rejects_other_hosts_and_invalid_users(host, user):

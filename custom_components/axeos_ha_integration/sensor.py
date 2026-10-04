@@ -25,7 +25,18 @@ from .models import AxeOSConfigEntry
 
 _LOGGER = logging.getLogger(__name__)
 
-_BTC_POW_LAB_HOST = "stratum.btcpowlab-pool.com"
+# Exact Stratum hosts mapped to the pool's per-address dashboard URL template.
+# Only pools whose dashboard is keyed by the payout address are listed here.
+_POOL_DASHBOARDS: dict[str, str] = {
+    "stratum.btcpowlab-pool.com": "https://btcpowlab-pool.com/miner/{address}",
+    "public-pool.io": "https://web.public-pool.io/#/app/{address}",
+    "solo.ckpool.org": "https://solostats.ckpool.org/users/{address}",
+    "eusolo.ckpool.org": "https://eusolostats.ckpool.org/users/{address}",
+    "ausolo.ckpool.org": "https://ausolostats.ckpool.org/users/{address}",
+    "mine.ocean.xyz": "https://ocean.xyz/stats/{address}",
+    "btc.hmpool.io": "https://hmpool.io/miner.html?address={address}",
+    "eu.btc.hmpool.io": "https://hmpool.io/miner.html?address={address}",
+}
 _BITCOIN_ADDRESS = re.compile(
     r"^(?:bc1[ac-hj-np-z02-9]{11,71}|[13][a-km-zA-HJ-NP-Z1-9]{25,34})$",
     re.IGNORECASE,
@@ -45,12 +56,13 @@ def pool_dashboard_url(data: dict[str, Any]) -> str | None:
     except ValueError:
         return None
 
+    if host is None:
+        return None
+    template = _POOL_DASHBOARDS.get(host.lower())
     address = raw_user.split(".", 1)[0]
-    if host is None or host.lower() != _BTC_POW_LAB_HOST:
+    if template is None or not _BITCOIN_ADDRESS.fullmatch(address):
         return None
-    if not _BITCOIN_ADDRESS.fullmatch(address):
-        return None
-    return f"https://btcpowlab-pool.com/miner/{quote(address, safe='')}"
+    return template.format(address=quote(address, safe=""))
 
 # -------------------------------------------------------------------------
 # SENSOR_TYPES: Mapping of relevant fields from /api/system/info to Home Assistant
