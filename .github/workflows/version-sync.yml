@@ -6,6 +6,7 @@ on:
     branches:
       - main
       - dev
+      - "nightly/**"
 
 jobs:
   check-version-sync:
