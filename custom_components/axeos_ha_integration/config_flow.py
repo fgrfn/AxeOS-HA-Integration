@@ -45,21 +45,25 @@ class AxeOSHaIntegrationConfigFlow(config_entries.ConfigFlow, domain=DOMAIN):
 
         if user_input is not None:
             host = user_input[CONF_HOST].strip()
-            name = user_input.get(CONF_NAME, host).strip()
+            requested_name = user_input.get(CONF_NAME, "").strip()
             scan_interval = user_input.get("scan_interval", DEFAULT_SCAN_INTERVAL)
 
             if not host:
                 errors["host"] = "invalid_host"
             else:
                 session = async_get_clientsession(self.hass)
-                api = AxeOSAPI(session, host)
                 try:
+                    api = AxeOSAPI(session, host)
+                    host = api.host
                     await api.get_system_info()
+                except ValueError:
+                    errors["host"] = "invalid_host"
                 except AxeOSApiError:
                     errors["base"] = "cannot_connect"
                 except Exception:
                     errors["base"] = "unknown"
                 else:
+                    name = requested_name or host
                     # Abort if host already configured
                     self._async_abort_entries_match({CONF_HOST: host})
                     return self.async_create_entry(

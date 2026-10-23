@@ -28,6 +28,7 @@ async def test_config_flow_creates_entry_after_probe():
     flow._async_abort_entries_match = MagicMock()
     flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
     api = MagicMock()
+    api.host = "192.0.2.1"
     api.get_system_info = AsyncMock(return_value={"boardVersion": "204"})
 
     with (
@@ -45,6 +46,33 @@ async def test_config_flow_creates_entry_after_probe():
 
     assert result == {"type": "create_entry"}
     flow._async_abort_entries_match.assert_called_once_with({"host": "192.0.2.1"})
+
+
+@pytest.mark.asyncio
+async def test_config_flow_stores_normalized_host():
+    """Equivalent host spellings cannot create duplicate config entries."""
+    flow = AxeOSHaIntegrationConfigFlow()
+    flow.hass = MagicMock()
+    flow._async_abort_entries_match = MagicMock()
+    flow.async_create_entry = MagicMock(return_value={"type": "create_entry"})
+    api = MagicMock()
+    api.host = "miner.local"
+    api.get_system_info = AsyncMock(return_value={"boardVersion": "204"})
+
+    with (
+        patch("custom_components.axeos_ha_integration.config_flow.async_get_clientsession"),
+        patch(
+            "custom_components.axeos_ha_integration.config_flow.AxeOSAPI",
+            return_value=api,
+        ),
+    ):
+        result = await flow.async_step_user(
+            {"host": "http://miner.local/", "name": "", "scan_interval": 30}
+        )
+
+    assert result == {"type": "create_entry"}
+    flow._async_abort_entries_match.assert_called_once_with({"host": "miner.local"})
+    assert flow.async_create_entry.call_args.kwargs["data"]["host"] == "miner.local"
 
 
 @pytest.mark.asyncio

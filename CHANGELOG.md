@@ -7,6 +7,10 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Fixed
+- Normalize pasted HTTP miner URLs before storing config entries and reject
+  unsupported schemes, credentials, paths, queries, and invalid ports.
+
 ### Added
 - Pool Dashboard sensor now also links to the per-address dashboards of
   Public Pool (`public-pool.io`), CKPool Solo (`solo`/`eusolo`/`ausolo.ckpool.org`)
