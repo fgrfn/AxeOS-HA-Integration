@@ -159,3 +159,25 @@ async def test_host_with_protocol(mock_session):
     api = AxeOSAPI(mock_session, "http://192.168.1.100")
 
     assert api.host == "192.168.1.100"
+
+
+@pytest.mark.parametrize(
+    ("value", "expected"),
+    [
+        (" 192.168.1.100 ", "192.168.1.100"),
+        ("http://miner.local/", "miner.local"),
+        ("miner.local:8080", "miner.local:8080"),
+        ("http://[fd00::42]:8080", "[fd00::42]:8080"),
+    ],
+)
+def test_host_is_normalized(mock_session, value, expected):
+    assert AxeOSAPI(mock_session, value).host == expected
+
+
+@pytest.mark.parametrize(
+    "value",
+    ["https://miner.local", "http://miner.local/admin", "http://user@miner.local", "miner.local:bad"],
+)
+def test_unsupported_host_input_is_rejected(mock_session, value):
+    with pytest.raises(ValueError):
+        AxeOSAPI(mock_session, value)
