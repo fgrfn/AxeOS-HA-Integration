@@ -1,6 +1,7 @@
 import asyncio
 import logging
 from typing import Any, cast
+from urllib.parse import urlsplit
 
 import aiohttp
 
@@ -18,6 +19,29 @@ _LOGGER = logging.getLogger(__name__)
 API_TIMEOUT = 10
 
 
+def _normalize_host(host: str) -> str:
+    """Return a bare HTTP host and reject URLs the client cannot represent."""
+    value = host.strip()
+    candidate = value if "://" in value else f"http://{value}"
+    parsed = urlsplit(candidate)
+    if (
+        parsed.scheme.lower() != "http"
+        or not parsed.hostname
+        or parsed.username is not None
+        or parsed.password is not None
+        or parsed.path not in ("", "/")
+        or parsed.query
+        or parsed.fragment
+    ):
+        raise ValueError("Host must be a hostname or an HTTP URL without a path")
+    try:
+        port = parsed.port
+    except ValueError as err:
+        raise ValueError("Host contains an invalid port") from err
+    normalized = f"[{parsed.hostname}]" if ":" in parsed.hostname else parsed.hostname
+    return f"{normalized}:{port}" if port is not None else normalized
+
+
 class AxeOSApiError(Exception):
     """Raised when communication with an AxeOS miner fails."""
 
@@ -27,11 +51,8 @@ class AxeOSAPI:
     Only the /api/system/info endpoint is queried."""
 
     def __init__(self, session: aiohttp.ClientSession, host: str):
-        # Remove protocol if already present
-        if host.startswith("http://"):
-            host = host[len("http://") :]
         self.session = session
-        self.host = host
+        self.host = _normalize_host(host)
         self.system_info = {}
 
     async def _request(
