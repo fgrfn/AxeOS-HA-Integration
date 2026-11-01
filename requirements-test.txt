@@ -5,5 +5,5 @@
 # test matrix. Newer releases are installed explicitly by the matrix jobs.
 homeassistant>=2024.11.0
 pytest>=9.2.0
-pytest-asyncio>=1.4.0
+pytest-asyncio>=1.4.1
 pytest-cov>=7.1.0
