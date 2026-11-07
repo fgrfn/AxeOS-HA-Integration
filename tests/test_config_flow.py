@@ -4,8 +4,10 @@ from types import SimpleNamespace
 from unittest.mock import AsyncMock, MagicMock, patch
 
 import pytest
+import voluptuous as vol
 
 from custom_components.axeos_ha_integration.config_flow import (
+    STEP_USER_DATA_SCHEMA,
     AxeOSHaIntegrationConfigFlow,
     AxeOSOptionsFlowHandler,
 )
@@ -97,3 +99,23 @@ async def test_options_flow_reads_and_updates_options():
     result = await handler.async_step_init({"scan_interval": 45})
 
     assert result == {"type": "create_entry"}
+
+
+def test_config_flow_rejects_non_positive_scan_intervals():
+    """Polling must not create a zero-delay coordinator update loop."""
+    for value in (0, -1):
+        with pytest.raises(vol.Invalid):
+            STEP_USER_DATA_SCHEMA({"host": "miner.local", "scan_interval": value})
+
+
+@pytest.mark.asyncio
+async def test_options_flow_rejects_non_positive_scan_intervals():
+    """Options use the same positive scan-interval constraint."""
+    handler = AxeOSOptionsFlowHandler(SimpleNamespace(options={}))
+    handler.async_show_form = MagicMock(return_value={"type": "form"})
+
+    await handler.async_step_init()
+    schema = handler.async_show_form.call_args.kwargs["data_schema"]
+
+    with pytest.raises(vol.Invalid):
+        schema({"scan_interval": 0})

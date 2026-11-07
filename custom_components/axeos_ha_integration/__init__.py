@@ -9,7 +9,13 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, UpdateFailed
 
 from .api import AxeOSAPI, AxeOSApiError
-from .const import CONF_HOST, CONF_NAME, DEFAULT_SCAN_INTERVAL, DOMAIN
+from .const import (
+    CONF_HOST,
+    CONF_NAME,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    MIN_SCAN_INTERVAL,
+)
 from .models import AxeOSConfigEntry, AxeOSRuntimeData
 from .services import async_setup_services, async_unload_services
 
@@ -65,6 +71,7 @@ async def async_setup_entry(hass: HomeAssistant, entry: AxeOSConfigEntry) -> boo
     scan_interval = entry.options.get(
         "scan_interval", entry.data.get("scan_interval", DEFAULT_SCAN_INTERVAL)
     )
+    scan_interval = max(MIN_SCAN_INTERVAL, scan_interval)
     coordinator = DataUpdateCoordinator(
         hass,
         _LOGGER,

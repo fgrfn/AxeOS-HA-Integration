@@ -79,3 +79,34 @@ async def test_unload_last_entry_removes_services():
         assert await async_unload_entry(hass, entry) is True
 
     unload_services.assert_awaited_once_with(hass)
+
+
+@pytest.mark.asyncio
+async def test_setup_clamps_legacy_non_positive_scan_interval():
+    """Existing invalid options cannot create a zero-delay update loop."""
+    hass = MagicMock()
+    hass.config_entries.async_forward_entry_setups = AsyncMock()
+    entry = MagicMock(entry_id="entry-id")
+    entry.data = {"host": "192.0.2.1", "scan_interval": 30}
+    entry.options = {"scan_interval": 0}
+    entry.add_update_listener.return_value = MagicMock()
+    coordinator = MagicMock()
+    coordinator.data = {}
+    coordinator.async_config_entry_first_refresh = AsyncMock()
+
+    with (
+        patch("custom_components.axeos_ha_integration.async_get_clientsession"),
+        patch("custom_components.axeos_ha_integration.AxeOSAPI"),
+        patch(
+            "custom_components.axeos_ha_integration.DataUpdateCoordinator",
+            return_value=coordinator,
+        ) as coordinator_class,
+        patch("custom_components.axeos_ha_integration.dr.async_get"),
+        patch(
+            "custom_components.axeos_ha_integration.async_setup_services",
+            new=AsyncMock(),
+        ),
+    ):
+        assert await async_setup_entry(hass, entry) is True
+
+    assert coordinator_class.call_args.kwargs["update_interval"].total_seconds() == 1
