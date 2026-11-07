@@ -1,5 +1,6 @@
 import logging
 from datetime import timedelta
+from math import isfinite
 
 from homeassistant.const import Platform
 from homeassistant.core import HomeAssistant
@@ -48,10 +49,15 @@ async def async_setup_entry(hass: HomeAssistant, entry: AxeOSConfigEntry) -> boo
             raise UpdateFailed(f"Cannot fetch system info from {host}: {err}") from err
 
         hr = system_info.get("hashRate")
-        if hr is not None:
-            hashrate_history.append(hr)
+        if (
+            isinstance(hr, (int, float))
+            and not isinstance(hr, bool)
+            and isfinite(hr)
+        ):
+            hashrate_history.append(float(hr))
             if len(hashrate_history) > 100:
                 del hashrate_history[:-100]
+        if hashrate_history:
             system_info["hashrate_history"] = hashrate_history.copy()
 
         return system_info

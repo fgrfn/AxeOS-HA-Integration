@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- Ignore malformed hashrate samples without corrupting the retained history or
+  its statistical sensor attributes.
 - Normalize pasted HTTP miner URLs before storing config entries and reject
   unsupported schemes, credentials, paths, queries, and invalid ports.
 
