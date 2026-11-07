@@ -11,13 +11,23 @@ from homeassistant.core import callback
 from homeassistant.helpers.aiohttp_client import async_get_clientsession
 
 from .api import AxeOSAPI, AxeOSApiError
-from .const import CONF_HOST, CONF_NAME, DEFAULT_SCAN_INTERVAL, DOMAIN
+from .const import (
+    CONF_HOST,
+    CONF_NAME,
+    DEFAULT_SCAN_INTERVAL,
+    DOMAIN,
+    MIN_SCAN_INTERVAL,
+)
+
+SCAN_INTERVAL_SCHEMA = vol.All(vol.Coerce(int), vol.Range(min=MIN_SCAN_INTERVAL))
 
 STEP_USER_DATA_SCHEMA = vol.Schema(
     {
         vol.Required(CONF_HOST): str,
         vol.Optional(CONF_NAME): str,
-        vol.Optional("scan_interval", default=DEFAULT_SCAN_INTERVAL): int,
+        vol.Optional(
+            "scan_interval", default=DEFAULT_SCAN_INTERVAL
+        ): SCAN_INTERVAL_SCHEMA,
     }
 )
 
@@ -105,7 +115,7 @@ class AxeOSOptionsFlowHandler(config_entries.OptionsFlow):
                 vol.Optional(
                     "scan_interval",
                     default=options.get("scan_interval", DEFAULT_SCAN_INTERVAL),
-                ): int,
+                ): SCAN_INTERVAL_SCHEMA,
                 vol.Optional(
                     "logging_level",
                     default=options.get("logging_level", "info"),

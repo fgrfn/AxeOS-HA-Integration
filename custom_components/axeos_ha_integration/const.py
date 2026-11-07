@@ -2,6 +2,7 @@
 
 DOMAIN = "axeos_ha_integration"
 DEFAULT_SCAN_INTERVAL = 30  # in seconds
+MIN_SCAN_INTERVAL = 1  # prevent zero/negative coordinator update loops
 
 CONF_HOST = "host"
 CONF_NAME = "name"
