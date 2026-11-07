@@ -81,6 +81,15 @@ async def test_restart_system_success(api, mock_session):
 
 
 @pytest.mark.asyncio
+@pytest.mark.parametrize("status", [201, 202, 204])
+async def test_commands_accept_all_success_statuses(api, mock_session, status):
+    """Successful commands may legitimately return any HTTP 2xx status."""
+    prepare_response(mock_session, status=status)
+
+    assert await api.restart_system() is True
+
+
+@pytest.mark.asyncio
 async def test_restart_system_failure(api, mock_session):
     """Test system restart failure."""
     prepare_response(mock_session, status=500)

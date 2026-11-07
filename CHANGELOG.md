@@ -8,6 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
+- Accept every successful HTTP 2xx response for miner commands, including
+  firmware variants that acknowledge commands with 202 or 204.
 - Normalize pasted HTTP miner URLs before storing config entries and reject
   unsupported schemes, credentials, paths, queries, and invalid ports.
 
