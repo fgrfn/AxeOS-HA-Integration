@@ -47,8 +47,7 @@ class AxeOSApiError(Exception):
 
 
 class AxeOSAPI:
-    """Client class to communicate with an AxeOS miner via HTTP.
-    Only the /api/system/info endpoint is queried."""
+    """Client class to communicate with an AxeOS miner via HTTP."""
 
     def __init__(self, session: aiohttp.ClientSession, host: str):
         self.session = session
@@ -70,7 +69,7 @@ class AxeOSAPI:
                 async with self.session.request(
                     method, url, json=json_body
                 ) as response:
-                    if response.status != 200:
+                    if not 200 <= response.status < 300:
                         raise AxeOSApiError(
                             f"AxeOS request to {url} returned HTTP {response.status}"
                         )
