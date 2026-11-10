@@ -59,6 +59,10 @@ async def test_setup_entry_initializes_coordinator_and_platforms():
     data = await update_method()
     assert data["hashrate_history"] == [500]
 
+    api.get_system_info.return_value = {"hashRate": "not-a-number"}
+    data = await update_method()
+    assert data["hashrate_history"] == [500]
+
 
 @pytest.mark.asyncio
 async def test_unload_last_entry_removes_services():

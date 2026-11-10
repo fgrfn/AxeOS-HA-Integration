@@ -8,8 +8,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ## [Unreleased]
 
 ### Fixed
-- Reject zero and negative polling intervals and safely clamp legacy values to
-  prevent a zero-delay coordinator update loop.
+- Ignore malformed hashrate samples without corrupting the retained history or
+  its statistical sensor attributes.
 - Normalize pasted HTTP miner URLs before storing config entries and reject
   unsupported schemes, credentials, paths, queries, and invalid ports.
 
